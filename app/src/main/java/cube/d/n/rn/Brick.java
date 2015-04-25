@@ -183,7 +183,7 @@ public class Brick extends BitmapBacked {
 
         //float scale =.15f;
         for (Face f : faces.values()) {
-            if (owner.active.get() == null || f.sharesSide(owner.active.get())) {
+            if (owner.drawFace(this,f)) {
 
                 // we need to get the compent vectors
                 ArrayList<Vector> comps = f.getIndex().getCompnetVectors(hasVectorDims);

@@ -25,6 +25,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
     ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
     ArrayList<Animation> animations = new ArrayList<>();
 
+    Button testB = new Button(100,100,200,200,"test") {
+        @Override
+        public void act() {
+            // do nothing;
+        }
+    };
+
     public Tess(Context context,int dim, int size) {
         super(context);
         if (dim> RN.rn().getMaxSize()){
@@ -102,6 +109,9 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
     @Override
     public void onDraw(Canvas canvas){
 
+        //TODO remove
+        testB.draw(canvas);
+
         // draw animations
         for (int i = animations.size()-1; i>=0;i--){
             Animation a = animations.get(i);
@@ -121,8 +131,6 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         for (Brick b: bricks.values()){
             if (active.get() == null || b.sharesFace(active.get())) {
                 b.draw(canvas,0xff);
-            }else{
-                //b.draw(canvas,0x22);
             }
         }
 
@@ -293,6 +301,12 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
     };
     public Vector getStartAt(){
         return new Vector(startAt);
+    }
+
+
+    public boolean drawFace(Brick brick, Face f) {
+        // TODO filter
+        return true;
     }
 
 
