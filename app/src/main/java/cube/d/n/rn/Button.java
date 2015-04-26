@@ -90,7 +90,7 @@ public abstract class Button extends BitmapBacked{
             tp.getTextBounds(txt, 0, txt.length(), out);
         }
 
-        canvas.drawText(txt,width/2f - out.width()/2f,height/2f - out.height()/2f,tp);
+        canvas.drawText(txt,(width/2f) - (out.width()/2f),(height/2f) - (out.height()/2f),tp);
 
         picture.endRecording();
 
