@@ -85,11 +85,11 @@ public class Index extends ArrayList<Integer> {
     public Index rotate(int dim1, int dim2, boolean direction,Tess owner) {
         Index newIndex = new Index(this);
         if (direction){
-            newIndex.set(dim1,owner.size-1-this.get(dim2));
+            newIndex.set(dim1,owner.size.get()-1-this.get(dim2));
             newIndex.set(dim2,this.get(dim1));
         }else {
             newIndex.set(dim1,this.get(dim2));
-            newIndex.set(dim2,owner.size-1-this.get(dim1));
+            newIndex.set(dim2,owner.size.get()-1-this.get(dim1));
         }
         return newIndex;
     }

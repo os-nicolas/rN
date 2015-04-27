@@ -33,7 +33,7 @@ public class Brick extends BitmapBacked {
 
     private void initFaces(Index at) {
         // for every pair of sides we need a face
-        if (at.size() == owner.dim) {
+        if (at.size() == owner.dim.get()) {
             Index faceIndex = new Index(at);
             faces.put(faceIndex, new Face(this, faceIndex, getIndex()));
         } else {
@@ -42,13 +42,13 @@ public class Brick extends BitmapBacked {
                 if (getIndex().get(at.size()) == 0) {
                     temp1.add(1);
                     initFaces(temp1);
-                } else if (getIndex().get(at.size()) == owner.size - 1) {
+                } else if (getIndex().get(at.size()) == owner.size.get() - 1) {
                     temp1.add(-1);
                     initFaces(temp1);
                 }
             }
             // if the number of slots left is larger the number of ones we still have to place
-            if (owner.dim - at.size() > 2 - at.noneZeroComps()) {
+            if (owner.dim.get() - at.size() > 2 - at.noneZeroComps()) {
                 Index temp2 = new Index(at);
                 temp2.add(0);
                 initFaces(temp2);
@@ -203,7 +203,7 @@ public class Brick extends BitmapBacked {
                     if (f.getIndex().get(i).equals(new Integer(0))){
                         if (myIndex.get(i).equals(new Integer(0))){
                             myStartAt.add(owner.vectorForDimension(i).scale(-per,false),false);
-                        }else if (myIndex.get(i).equals(new Integer(owner.size-1))){
+                        }else if (myIndex.get(i).equals(new Integer(owner.size.get()-1))){
                             myStartAt.add(owner.vectorForDimension(i).scale(per,false),false);
                         }
                     }
@@ -266,7 +266,7 @@ public class Brick extends BitmapBacked {
         for (int i = 0; i < myIndex.size(); i++) {
             if (myIndex.get(i).equals(otherIndex.get(i))) {
                 numberEqual++;
-                if (numberEqual >= owner.size - 2) {
+                if (numberEqual >= owner.size.get() - 2) {
                     return true;
                 }
             }

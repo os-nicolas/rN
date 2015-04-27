@@ -12,9 +12,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Tess myView = new Tess(this,4,2);
+        //Tess myView = new Tess(this,4,2);
 
-        setContentView(myView);
+        setContentView(R.layout.activity_main);
     }
 
 

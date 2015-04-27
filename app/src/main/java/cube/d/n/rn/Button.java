@@ -14,18 +14,24 @@ import java.util.ArrayList;
 /**
  * Created by Colin_000 on 4/23/2015.
  */
-public abstract class Button extends BitmapBacked{
+public class Button extends BitmapBacked{
 
     String txt;
     Vector topLeft;
     float width;
     float height;
+    public GS<Action> action = new GS<>();
 
     public Button(float left, float top, float right, float bot, String txt){
         width = right- left;
         height = bot - top;
         topLeft = new Vector(top,left);
         this.txt = txt;
+    }
+
+    public Button(float left, float top, float right, float bot, String txt,Action action){
+        this(left,top,right,bot,txt);
+        this.action.set(action);
     }
 
     public void draw(Canvas canvas) {
@@ -37,11 +43,13 @@ public abstract class Button extends BitmapBacked{
     }
 
     public void click(){
+        if (action.get().canAct()) {
+            action.get().act();
+        }
         invalidate();
     }
 
-    public abstract void act();
-
+    float edgeBit = 0;
     protected Bitmap updateBitmap(){
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int)width, (int)height);
@@ -50,7 +58,7 @@ public abstract class Button extends BitmapBacked{
         // draw a hexagon
         // generating the lines takes a bit of work
         for (float i=0;i<3;i++){
-            double angle= Math.PI*(i+.5)/(3)  - Math.PI/2f;
+            double angle= Math.PI*(i+.5)/(3);
             Vector v = new Vector( (float)Math.sin(angle), (float)Math.cos(angle));
             Log.i("adding vector:", v + "");
             vectors.add(v);
@@ -63,15 +71,27 @@ public abstract class Button extends BitmapBacked{
         }
 
         float buffer =2f;
+
+        // first we do the side bros
         for (Vector v: vectors){
-            v.x*= (-2*buffer+width)/xSum;
-            v.y*= (-2*buffer+height)/ySum;
+            if (Math.abs(v.y) >.1) {
+                v.x*= (-2*buffer+height)/ySum;
+                edgeBit = v.x; // should be the same for all of these
+                v.y*= (-2*buffer+height)/ySum;
+            }
+
+        }
+
+        for (Vector v: vectors){
+            if (Math.abs(v.y) <.1) {
+                v.x = (width-2 * buffer  - 2*edgeBit );
+            }
         }
 
         Paint p = new Paint();
         p.setStrokeWidth(3);
 
-        Vector at = new Vector(width/2f,buffer);
+        Vector at = new Vector(buffer,height/2f);
         for (Vector v: vectors){
             Vector old = new Vector(at);
             Util.drawLine(canvas,old,at.add(v,false),p);
@@ -83,14 +103,15 @@ public abstract class Button extends BitmapBacked{
 
         //now we need to draw the text centered
         TextPaint tp = new TextPaint();
+        tp.setTextSize(45);
         Rect out = new Rect();
         tp.getTextBounds(txt, 0, txt.length(), out);
-        while (out.width() + 2 * buffer > width || out.height() + 2 * buffer > height) {
-            tp.setTextSize(tp.getTextSize() - 1);
+        while (out.width() + (2 * buffer) > width || out.height() + (2 * buffer) > height) {
+            tp.setTextSize(tp.getTextSize() - 0.1f);
             tp.getTextBounds(txt, 0, txt.length(), out);
         }
 
-        canvas.drawText(txt,(width/2f) - (out.width()/2f),(height/2f) - (out.height()/2f),tp);
+        canvas.drawText(txt,(width/2f) - (out.width()/2f),(height/2f) + (out.height()/2f),tp);
 
         picture.endRecording();
 

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,26 +20,31 @@ import java.util.HashMap;
 public class Tess extends View implements View.OnTouchListener, HasVectorDims{
 
     private HashMap<Index,Brick> bricks= new HashMap<>();
-    public final  int size;
-    public final int dim;
+    public GS<Integer> size = new GS<>();
+    public GS<Integer> dim = new GS<>();
     private Vector startAt;
     ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
     ArrayList<Animation> animations = new ArrayList<>();
 
-    Button testB = new Button(100,100,200,200,"test") {
+    Button testB = new Button(100,100,500,200,"test",new Action(){
         @Override
-        public void act() {
+        public void act(){
             // do nothing;
         }
-    };
+    });
+
 
     public Tess(Context context,int dim, int size) {
         super(context);
         if (dim> RN.rn().getMaxSize()){
             Log.w("Tess", "dim exceeds max dimension");
         }
-        this.dim = dim;
-        this.size = size;
+        init(dim, size);
+    }
+
+    private void init(int dim, int size) {
+        this.dim.set(dim);
+        this.size.set(size);
         initCube(new Index());
 
         final Tess that = this;
@@ -53,8 +59,11 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         );
 
         this.setOnTouchListener(this);
+    }
 
-
+    public Tess(Context context, AttributeSet attrs){
+        super(context,attrs);
+        init(3, 2);
     }
 
     public void rotate(Index startAt, int dim1,int dim2, boolean direction){
@@ -62,8 +71,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         // find the set of points we are going to rotate
         // uses the og indexs
         HashMap<Index,Brick> toRotate = new HashMap<>();
-        for (int i=0;i<size;i++){
-            for (int j=0;j<size;j++){
+        for (int i=0;i<size.get();i++){
+            for (int j=0;j<size.get();j++){
                 Index myIndex = new Index(startAt);
                 myIndex.set(dim1,i);
                 myIndex.set(dim2,j);
@@ -91,10 +100,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
 
 
     public void initCube(Index at){
-        if (at.size() == dim){
+        if (at.size() == dim.get()){
             new Brick(new Index(at),this);
         }else{
-            for (int i=0;i<size;i++){
+            for (int i=0;i<size.get();i++){
                 Index temp = new Index(at);
                 temp.add(i);
                 initCube(temp);
@@ -149,7 +158,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
                     // when the index is zero draw a line from b to
                     // to a copy of b where at have an index of size
                     Index indexTo = new Index(index);
-                    indexTo.set(at,size-1);
+                    indexTo.set(at,size.get()-1);
                     Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), grey);
                 }
             }
@@ -190,8 +199,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
 
     public float scale;
     private void intiDimVectors(float width,float height) {
-        for (float i=0;i<dim;i++){
-            double angle= Math.PI*(i+.5)/(dim)  - Math.PI/2f;
+        for (float i=0;i<dim.get();i++){
+            double angle= Math.PI*(i+.5)/(dim.get())  - Math.PI/2f;
             Vector v = new Vector( (float)Math.sin(angle), (float)Math.cos(angle));
             Log.i("adding vector:", v+"");
             dimensionVectors.put((int)i,v);
