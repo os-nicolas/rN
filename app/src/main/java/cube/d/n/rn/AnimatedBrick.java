@@ -3,9 +3,6 @@ package cube.d.n.rn;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Picture;
-
-import java.util.ArrayList;
 
 /**
  * Created by Colin_000 on 4/22/2015.
@@ -21,6 +18,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
     public AnimatedBrick next=null;
 
     public AnimatedBrick(Index from, int dim1,int dim2, boolean direction ,Brick brick){
+        super(brick.owner);
         this.from = from;
         this.dim1 = dim1;
         this.dim2 = dim2;
@@ -39,7 +37,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
             startAt = System.currentTimeMillis();
         }
 
-        invalidate();
+        myInvalidate();
         Vector to = brick.getIndex().getVector(brick.owner);
         if (next !=null){
             to = brick.getIndex().rotate(dim1,dim2,!direction,brick.owner).getVector(brick.owner);

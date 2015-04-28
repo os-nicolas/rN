@@ -23,6 +23,7 @@ public class Brick extends BitmapBacked {
 
 
     public Brick(Index i, Tess owner) {
+        super (owner);
         this.owner = owner;
         owner.addBrick(i, this);
         initFaces(new Index());
@@ -140,7 +141,7 @@ public class Brick extends BitmapBacked {
             }
             faces.put(newIndex, myFace);
         }
-        invalidate();
+        myInvalidate();
     }
 
     public boolean in(Vector vector) {

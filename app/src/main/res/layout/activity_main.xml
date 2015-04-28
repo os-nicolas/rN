@@ -20,7 +20,8 @@
 
     <cube.d.n.rn.ButtonView
         android:layout_width="fill_parent"
-        android:layout_height="50dp" />
+        android:layout_height="50dp"
+        android:text="yolo"/>
 
     <cube.d.n.rn.ButtonView
         android:layout_width="fill_parent"

@@ -21,4 +21,12 @@ public class RN extends Application {
     public int fadeTime() {
         return 500;
     }
+
+    public float rate() {
+        return 5;
+    }
+
+    public float scale() {
+        return 1;
+    }
 }

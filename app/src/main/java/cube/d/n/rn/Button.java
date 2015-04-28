@@ -1,20 +1,29 @@
 package cube.d.n.rn;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 
 /**
  * Created by Colin_000 on 4/23/2015.
  */
-public class Button extends BitmapBacked{
+public class Button extends BitmapBacked {
+    //TODO we need to know when the button is not being touched so we can shrink it back down
+    // this mean set a time out and on each change and after the timeout set the target to normal if nothing has happened
+
+
+    float edgeBit = 0;
+    private final float BaseBuffer = 12f * RN.rn().scale();
+    float targetBuffer = BaseBuffer;
+    float currentBuffer = BaseBuffer;
 
     String txt;
     Vector topLeft;
@@ -22,15 +31,17 @@ public class Button extends BitmapBacked{
     float height;
     public GS<Action> action = new GS<>();
 
-    public Button(float left, float top, float right, float bot, String txt){
-        width = right- left;
+
+    public Button(float left, float top, float right, float bot, String txt, View owner) {
+        super(owner);
+        width = right - left;
         height = bot - top;
-        topLeft = new Vector(top,left);
+        topLeft = new Vector(top, left);
         this.txt = txt;
     }
 
-    public Button(float left, float top, float right, float bot, String txt,Action action){
-        this(left,top,right,bot,txt);
+    public Button(float left, float top, float right, float bot, String txt, View owner,Action action) {
+        this(left, top, right, bot, txt,owner);
         this.action.set(action);
     }
 
@@ -38,19 +49,69 @@ public class Button extends BitmapBacked{
         drawBitmap(canvas, topLeft.x, topLeft.y, new Paint());
     }
 
-    public void hover(){
-        invalidate();
+    public void hover() {
+        //if (action.get() != null && action.get().canAct()) {
+        //    setTargetBuffer(6f);
+
+        Log.i("Button","hover - " + currentBuffer );
+        //}
+    }
+
+    private void setCurrentBuffer(float cb) {
+        currentBuffer=cb*RN.rn().scale();
+        myInvalidate();
+    }
+
+//    private long lastChange = System.currentTimeMillis();
+    private void setTargetBuffer(float tb) {
+        targetBuffer=tb*RN.rn().scale();
+        myInvalidate();
+//        lastChange = System.currentTimeMillis();
+//        final long  myChange = lastChange;
+//        final Activity activity = (Activity) owner.getContext();
+//        Thread th = new Thread(){
+//            @Override
+//            public void run(){
+//                try{
+//                    Thread.sleep(300);
+//                    if (myChange == lastChange){
+//                        targetBuffer=BaseBuffer;
+//                        activity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                myInvalidate();
+//                            }
+//                        });
+//                    }
+//                }catch(InterruptedException e){
+//                    e.printStackTrace();
+//                }
+//            }
+//        };
+//        th.start();
+
     }
 
     public void click(){
-        if (action.get().canAct()) {
-            action.get().act();
-        }
-        invalidate();
+        //if (action.get() != null && action.get().canAct()) {
+        setCurrentBuffer(2f);
+//        setTargetBuffer(2f);
+//            action.get().act();
+
+        Log.i("Button","click - " + currentBuffer );
+        //}
     }
 
-    float edgeBit = 0;
+    @Override
     protected Bitmap updateBitmap(){
+        currentBuffer = ((RN.rn().rate()-1f)* currentBuffer + targetBuffer)/RN.rn().rate();
+        Log.i("updated current buffer", currentBuffer+"");
+        if (Math.abs(currentBuffer - targetBuffer) < .02){
+            currentBuffer = targetBuffer;
+        }else{
+            myInvalidate();
+        }
+
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int)width, (int)height);
 
@@ -60,7 +121,6 @@ public class Button extends BitmapBacked{
         for (float i=0;i<3;i++){
             double angle= Math.PI*(i+.5)/(3);
             Vector v = new Vector( (float)Math.sin(angle), (float)Math.cos(angle));
-            Log.i("adding vector:", v + "");
             vectors.add(v);
         }
         float xSum = 0;
@@ -70,28 +130,26 @@ public class Button extends BitmapBacked{
             ySum+=Math.abs(v.y);
         }
 
-        float buffer =2f;
-
         // first we do the side bros
         for (Vector v: vectors){
             if (Math.abs(v.y) >.1) {
-                v.x*= (-2*buffer+height)/ySum;
+                v.x*= (-2*currentBuffer+height)/ySum;
                 edgeBit = v.x; // should be the same for all of these
-                v.y*= (-2*buffer+height)/ySum;
+                v.y*= (-2*currentBuffer+height)/ySum;
             }
 
         }
 
         for (Vector v: vectors){
             if (Math.abs(v.y) <.1) {
-                v.x = (width-2 * buffer  - 2*edgeBit );
+                v.x = (width-2 * currentBuffer  - 2*edgeBit );
             }
         }
 
         Paint p = new Paint();
         p.setStrokeWidth(3);
 
-        Vector at = new Vector(buffer,height/2f);
+        Vector at = new Vector(currentBuffer,height/2f);
         for (Vector v: vectors){
             Vector old = new Vector(at);
             Util.drawLine(canvas,old,at.add(v,false),p);
@@ -106,7 +164,7 @@ public class Button extends BitmapBacked{
         tp.setTextSize(45);
         Rect out = new Rect();
         tp.getTextBounds(txt, 0, txt.length(), out);
-        while (out.width() + (2 * buffer) > width || out.height() + (2 * buffer) > height) {
+        while (out.width() + (2 * currentBuffer) > width || out.height() + (2 * currentBuffer) > height) {
             tp.setTextSize(tp.getTextSize() - 0.1f);
             tp.getTextBounds(txt, 0, txt.length(), out);
         }
@@ -119,9 +177,20 @@ public class Button extends BitmapBacked{
     }
 
     public boolean in(Vector at){
-        //TODO
-        // we modle as a ???
+        // we model the body as a square
+        if ((at.y > topLeft.y && at.y < topLeft.y + height ) &&
+                (at.x > topLeft.x + edgeBit && at.x < topLeft.x + width - edgeBit)){
+            return true;
+        }
+        // we model the ends as circles
+        Vector leftEnd = new Vector(topLeft.x+edgeBit,edgeBit);
+        if (leftEnd.distance(at)<edgeBit ){
+            return true;
+        }
+        Vector rightEnd = new Vector(topLeft.x+width-edgeBit,edgeBit);
+        if (rightEnd.distance(at)<edgeBit ){
+            return true;
+        }
         return false;
-
     }
 }

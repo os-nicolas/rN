@@ -1,10 +1,8 @@
 package cube.d.n.rn;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Picture;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,14 +23,6 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
     private Vector startAt;
     ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
     ArrayList<Animation> animations = new ArrayList<>();
-
-    Button testB = new Button(100,100,500,200,"test",new Action(){
-        @Override
-        public void act(){
-            // do nothing;
-        }
-    });
-
 
     public Tess(Context context,int dim, int size) {
         super(context);
@@ -117,9 +107,6 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
 
     @Override
     public void onDraw(Canvas canvas){
-
-        //TODO remove
-        testB.draw(canvas);
 
         // draw animations
         for (int i = animations.size()-1; i>=0;i--){
@@ -287,10 +274,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         @Override
         public void set(Brick newActive) {
             if (value!= null) {
-                value.invalidate();
+                value.myInvalidate();
             }
             if (newActive!= null) {
-                newActive.invalidate();
+                newActive.myInvalidate();
             }
             value = newActive;
             if (value != null) {
@@ -299,7 +286,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
                 spinTos = new ArrayList<>();
             }
             for (Brick b: bricks.values()){
-                b.invalidate();
+                b.myInvalidate();
             }
         }
 

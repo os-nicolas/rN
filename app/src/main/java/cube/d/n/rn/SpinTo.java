@@ -10,7 +10,6 @@ import android.util.Log;
  * Created by Colin_000 on 4/20/2015.
  */
 public class SpinTo extends BitmapBacked {
-    final public Tess owner;
     final float  radius = 25f;
     private Vector myVector;
 
@@ -24,7 +23,7 @@ public class SpinTo extends BitmapBacked {
     public final boolean flip;
 
     public SpinTo(Brick form, Index plane, int clicks,Tess owner){
-        this.owner = owner;
+        super(owner);
         //calculate vector
         myVector = new Vector(form.getVector());
         v1 = getVector(plane, 0);
@@ -66,7 +65,7 @@ public class SpinTo extends BitmapBacked {
     private Vector getVector(Index plane,int skip) {
         int dim =getDim(plane,skip);
         Integer integer = plane.get(dim);
-        return owner.vectorForDimension(dim).scale(integer,false);
+        return ((Tess)owner).vectorForDimension(dim).scale(integer,false);
     }
 
 
@@ -78,12 +77,12 @@ public class SpinTo extends BitmapBacked {
         //spin the cube
         Log.i("spin","this:"+this);
         if (clicks ==1) {
-            owner.rotate(startAt, dim1, dim2,!flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
         }else if (clicks ==2){
-            owner.rotate(startAt, dim1, dim2,!flip );
-            owner.rotate(startAt, dim1, dim2,!flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
         }else if (clicks == -1){
-            owner.rotate(startAt, dim1, dim2,flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2,flip );
         }
     }
 
