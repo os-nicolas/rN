@@ -5,6 +5,10 @@ package cube.d.n.rn;
  */
 public class GS<T> {
     protected T value;
+    public GS(){}
+    public GS(T inValue){
+        set(inValue);
+    }
     public T get(){
         return value;
     }

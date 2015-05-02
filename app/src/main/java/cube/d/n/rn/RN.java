@@ -29,4 +29,12 @@ public class RN extends Application {
     public float scale() {
         return 1;
     }
+
+    public int getDarkColor() {
+        return 0xff888888;
+    }
+
+    public float getStrokeWidth() {
+        return 3f;
+    }
 }

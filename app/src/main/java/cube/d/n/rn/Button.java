@@ -25,7 +25,13 @@ public class Button extends BitmapBacked {
     float targetBuffer = BaseBuffer;
     float currentBuffer = BaseBuffer;
 
-    String txt;
+    public GS<String> txt =new GS<String>(""){
+        @Override
+        public void set(String newValue){
+            super.set(newValue);
+            myInvalidate();
+        }
+    };
     Vector topLeft;
     float width;
     float height;
@@ -37,7 +43,7 @@ public class Button extends BitmapBacked {
         width = right - left;
         height = bot - top;
         topLeft = new Vector(top, left);
-        this.txt = txt;
+        this.txt.set(txt);
     }
 
     public Button(float left, float top, float right, float bot, String txt, View owner,Action action) {
@@ -105,7 +111,6 @@ public class Button extends BitmapBacked {
     @Override
     protected Bitmap updateBitmap(){
         currentBuffer = ((RN.rn().rate()-1f)* currentBuffer + targetBuffer)/RN.rn().rate();
-        Log.i("updated current buffer", currentBuffer+"");
         if (Math.abs(currentBuffer - targetBuffer) < .02){
             currentBuffer = targetBuffer;
         }else{
@@ -147,7 +152,8 @@ public class Button extends BitmapBacked {
         }
 
         Paint p = new Paint();
-        p.setStrokeWidth(3);
+        p.setColor(RN.rn().getDarkColor());
+        p.setStrokeWidth(RN.rn().getStrokeWidth());
 
         Vector at = new Vector(currentBuffer,height/2f);
         for (Vector v: vectors){
@@ -163,13 +169,13 @@ public class Button extends BitmapBacked {
         TextPaint tp = new TextPaint();
         tp.setTextSize(45);
         Rect out = new Rect();
-        tp.getTextBounds(txt, 0, txt.length(), out);
+        tp.getTextBounds(txt.get(), 0, txt.get().length(), out);
         while (out.width() + (2 * currentBuffer) > width || out.height() + (2 * currentBuffer) > height) {
             tp.setTextSize(tp.getTextSize() - 0.1f);
-            tp.getTextBounds(txt, 0, txt.length(), out);
+            tp.getTextBounds(txt.get(), 0, txt.get().length(), out);
         }
 
-        canvas.drawText(txt,(width/2f) - (out.width()/2f),(height/2f) + (out.height()/2f),tp);
+        canvas.drawText(txt.get(),(width/2f) - (out.width()/2f),(height/2f) + (out.height()/2f),tp);
 
         picture.endRecording();
 

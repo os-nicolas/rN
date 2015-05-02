@@ -13,20 +13,13 @@ public class Face {
     final Brick owner;
     private final int color;
 
-    public Face(Brick owner, Index faceIndex, Index onwerIndex){
+    public Face(Brick owner, Index faceIndex, Index ownerIndex){
         this.owner = owner;
-
-        this.color = getColor(faceIndex, onwerIndex);
+        this.color = getColor(faceIndex, ownerIndex);
     }
 
     private static HashMap<ColorKey,Integer> colors = new HashMap<>();
     private static int getColor(Index faceIndex, Index ownerIndex) {
-        // we zero out
-        for (int i=0;i<faceIndex.size();i++){
-            if (0!=faceIndex.get(i)){
-                ownerIndex.set(i,0);
-            }
-        }
 
         // now we make out ColorKey
         ColorKey myKey = new ColorKey(faceIndex,ownerIndex);

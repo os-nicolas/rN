@@ -37,12 +37,16 @@ public class ButtonView extends View implements View.OnTouchListener {
                 return value;
             }
         };
+        // we don't want myB to be null
+        // we put text in it and then when myB is created
+        // we pass the text on
+        myB.set(new Button(0,0,10,10,"",that));
 
         this.getViewTreeObserver().addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        that.myB.set( new Button(0,0,getWidth(),getHeight(),"",that));
+                        that.myB.set( new Button(0,0,getWidth(),getHeight(),that.myB.get().txt.get(),that));
                         that.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
                 }
@@ -54,13 +58,20 @@ public class ButtonView extends View implements View.OnTouchListener {
         super(context,attrs);
         init();
 
-        TypedArray a=getContext().obtainStyledAttributes(
+        //This is pulled from here: http://developer.android.com/training/custom-views/create-view.html
+        TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
-                R.styleable.ButtonView);
+                R.styleable.ButtonView,
+                0, 0);
 
-
-        Log.i("test", a.getString(
-                R.styleable.ButtonView_android_text));
+        try {
+            if ( null != a.getString(R.styleable.ButtonView_mytext)) {
+                myB.get().txt.set(a.getString(R.styleable.ButtonView_mytext));
+            }
+        } finally {
+            // not sure why i need to recycle...
+            a.recycle();
+        }
     }
 
     @Override

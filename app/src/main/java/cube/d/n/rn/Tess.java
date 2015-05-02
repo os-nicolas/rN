@@ -53,7 +53,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
 
     public Tess(Context context, AttributeSet attrs){
         super(context,attrs);
-        init(3, 2);
+        init(3, 3);
     }
 
     public void rotate(Index startAt, int dim1,int dim2, boolean direction){
@@ -197,8 +197,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         float xSum = 0;
         float ySum =0;
         for (Vector v: dimensionVectors.values()){
-            xSum+=Math.abs(v.x);
-            ySum+=Math.abs(v.y);
+            xSum+=Math.abs(v.x)*(size.get()-1);
+            ySum+=Math.abs(v.y)*(size.get()-1);
         }
         float buffer = 30;//TODO scale by dpi
         scale = Math.min(

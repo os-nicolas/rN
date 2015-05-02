@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class Brick extends BitmapBacked {
 
 
     public Brick(Index i, Tess owner) {
-        super (owner);
+        super(owner);
         this.owner = owner;
         owner.addBrick(i, this);
         initFaces(new Index());
@@ -36,7 +37,26 @@ public class Brick extends BitmapBacked {
         // for every pair of sides we need a face
         if (at.size() == owner.dim.get()) {
             Index faceIndex = new Index(at);
-            faces.put(faceIndex, new Face(this, faceIndex, getIndex()));
+            Index ownerIndex = getIndex();
+
+            // we zero out the place of face index in ownerIndex
+            for (int i = 0; i < faceIndex.size(); i++) {
+                if (0 != faceIndex.get(i)) {
+                    ownerIndex.set(i, 0);
+                }
+            }
+
+            // we zero out owner indexes that are not zero or size-1
+            for (int i = 0; i < ownerIndex.size(); i++) {
+                if (0 != ownerIndex.get(i) && owner.size.get() - 1 != ownerIndex.get(i)) {
+                    ownerIndex.set(i, 0);
+                    faceIndex.set(i, 1);
+                }
+            }
+            if (faceIndex.noneZeroComps() == 2) {
+                faces.put(faceIndex, new Face(this, faceIndex, ownerIndex));
+            }
+
         } else {
             if (at.noneZeroComps() < 2) {
                 Index temp1 = new Index(at);
@@ -47,13 +67,14 @@ public class Brick extends BitmapBacked {
                     temp1.add(-1);
                     initFaces(temp1);
                 }
+
             }
-            // if the number of slots left is larger the number of ones we still have to place
-            if (owner.dim.get() - at.size() > 2 - at.noneZeroComps()) {
-                Index temp2 = new Index(at);
-                temp2.add(0);
-                initFaces(temp2);
-            }
+            // if the number of noneZeroComps we need add is less than the number of spots we have left
+//            if (2-at.noneZeroComps() < owner.dim.get()-at.size()) {
+            Index temp2 = new Index(at);
+            temp2.add(0);
+            initFaces(temp2);
+//            }
         }
     }
 
@@ -184,10 +205,16 @@ public class Brick extends BitmapBacked {
 
         //float scale =.15f;
         for (Face f : faces.values()) {
-            if (owner.drawFace(this,f)) {
+            if (owner.drawFace(this, f)) {
+                //TODO maybe faces should know how to draw themselves
 
                 // we need to get the compent vectors
                 ArrayList<Vector> comps = f.getIndex().getCompnetVectors(hasVectorDims);
+                if (comps.size() < 2) {
+                    Log.e("brick", "comps should be size 2");
+                }
+
+
                 for (Vector v : comps) {
                     v.toUnit(false).scale(radius / 2f, false);
                 }
@@ -196,27 +223,27 @@ public class Brick extends BitmapBacked {
                 p.setStrokeWidth(5);
                 p.setColor(f.getColor());
 
-                float per = .1f;
-
-                Vector myStartAt = new Vector(startAt);
-                Index myIndex = getIndex();
-                for (int i=0;i<myIndex.size();i++){
-                    if (f.getIndex().get(i).equals(new Integer(0))){
-                        if (myIndex.get(i).equals(new Integer(0))){
-                            myStartAt.add(owner.vectorForDimension(i).scale(-per,false),false);
-                        }else if (myIndex.get(i).equals(new Integer(owner.size.get()-1))){
-                            myStartAt.add(owner.vectorForDimension(i).scale(per,false),false);
-                        }
-                    }
-
-                }
-
-                Util.drawLine(canvas,
-                        myStartAt,
-                        myStartAt.add(comps.get(0), true), p);
-                Util.drawLine(canvas,
-                        myStartAt,
-                        myStartAt.add(comps.get(1), true), p);
+//                float per = .1f;
+//
+//                Vector myStartAt = new Vector(startAt);
+//                Index myIndex = getIndex();
+//                for (int i=0;i<myIndex.size();i++){
+//                    if (f.getIndex().get(i).equals(new Integer(0))){
+//                        if (myIndex.get(i).equals(new Integer(0))){
+//                            myStartAt.add(owner.vectorForDimension(i).scale(-per,false),false);
+//                        }else if (myIndex.get(i).equals(new Integer(owner.size.get()-1))){
+//                            myStartAt.add(owner.vectorForDimension(i).scale(per,false),false);
+//                        }
+//                    }
+//
+//                }
+//
+//                Util.drawLine(canvas,
+//                        myStartAt,
+//                        myStartAt.add(comps.get(0), true), p);
+//                Util.drawLine(canvas,
+//                        myStartAt,
+//                        myStartAt.add(comps.get(1), true), p);
 
 
 //            Vector v = startAt.add(comps.get(0),true).add(comps.get(1),false);
@@ -226,21 +253,43 @@ public class Brick extends BitmapBacked {
 //            Util.drawLine(canvas,
 //                    startAt.add(comps.get(0),true).add(comps.get(1),false),
 //                    startAt, p);
+//                float percent = 1f;
+//                float back = -.5f;
 
-//                float percent = .05f;
-//
-//            Util.drawLine(canvas,
-//                    startAt.add(comps.get(0),true).add(comps.get(1).scale(percent,true),false),
-//                    startAt.add(comps.get(0),true).add(comps.get(1),false), p);
-//            Util.drawLine(canvas,
-//                    startAt.add(comps.get(0),true).add(comps.get(1),false),
-//                    startAt.add(comps.get(1),true).add(comps.get(0).scale(percent,true),false), p);
-//                Util.drawLine(canvas,
-//                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
-//                        startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
-//                Util.drawLine(canvas,
-//                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-//                        startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent,true),false),
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(back*percent,true),false), p);
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(back*percent,true),false),
+//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(back*percent,true),false), p);
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(back*percent,true),false),
+//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(percent,true),false), p);
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(percent,true),false),
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent,true),false), p);
+
+
+                float percent = .5f;
+                Util.drawLine(canvas,
+                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
+                Util.drawLine(canvas,
+                        startAt.add(comps.get(0), true).add(comps.get(1), false),
+                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
+                Util.drawLine(canvas,
+                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
+                        startAt, p);
+                Util.drawLine(canvas,
+                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+                        startAt, p);
+
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
+//                    Util.drawLine(canvas,
+//                            startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
                 //Util.drawLine(canvas, startAt, startAt.addAsNew(comps.get(0)), p);
 //            Util.drawLine(canvas,
 //                    startAt.add(comps.get(0),true),
@@ -251,7 +300,9 @@ public class Brick extends BitmapBacked {
                 //Util.drawLine(canvas,startAt.addAsNew(comps.get(1)),startAt,p);
 
                 //scale +=.05f;
+
             }
+
         }
 
         picture.endRecording();
