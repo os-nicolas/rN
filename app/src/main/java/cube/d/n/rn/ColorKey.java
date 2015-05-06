@@ -4,10 +4,10 @@ package cube.d.n.rn;
  * Created by Colin_000 on 4/22/2015.
  */
 public class ColorKey {
-    public final Index faceIndex;
+    public final FaceIndex faceIndex;
     public final Index atIndex;
 
-    public ColorKey( Index faceIndex, Index atIndex){
+    public ColorKey( FaceIndex faceIndex, Index atIndex){
         this.faceIndex = faceIndex;
         this.atIndex= atIndex;
     }
@@ -22,7 +22,7 @@ public class ColorKey {
 
     @Override
     public int hashCode(){
-        return atIndex.hashCode()*(int)Math.pow(RN.rn().getMaxSize(),faceIndex.size()) + binaryHash(faceIndex);
+        return atIndex.hashCode()*(int)Math.pow(FaceIndex.enumSize(),faceIndex.size()) + faceIndex.hashCode();
     }
 
     private int binaryHash(Index faceIndex) {

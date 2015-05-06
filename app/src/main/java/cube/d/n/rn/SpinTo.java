@@ -22,7 +22,7 @@ public class SpinTo extends BitmapBacked {
     public final int clicks;
     public final boolean flip;
 
-    public SpinTo(Brick form, Index plane, int clicks,Tess owner){
+    public SpinTo(Brick form, FaceIndex plane, int clicks,Tess owner){
         super(owner);
         //calculate vector
         myVector = new Vector(form.getVector());
@@ -47,11 +47,10 @@ public class SpinTo extends BitmapBacked {
         this.clicks =clicks;
     }
 
-    private  int getDim(Index plane,int skip){
+    private  int getDim(FaceIndex plane,int skip){
         int skipped = 0;
-        for (int i =0;i<plane.size();i++){
-            Integer integer = plane.get(i);
-            if (integer!=0){
+        for (int i =0;i<plane.size();i++){;
+            if (plane.get(i)!= FaceIndex.FaceValue.NONE){
                 if (skipped < skip){
                     skipped++;
                 }else{
@@ -62,10 +61,27 @@ public class SpinTo extends BitmapBacked {
         return -1;
     }
 
-    private Vector getVector(Index plane,int skip) {
+    private Vector getVector(FaceIndex plane,int skip) {
         int dim =getDim(plane,skip);
-        Integer integer = plane.get(dim);
-        return ((Tess)owner).vectorForDimension(dim).scale(integer,false);
+        FaceIndex.FaceValue fv = plane.get(dim);
+        Vector v = ((Tess)owner).vectorForDimension(dim);
+        if (fv == FaceIndex.FaceValue.NONE){
+            return v.scale(0,true);
+        }
+        if (fv == FaceIndex.FaceValue.FORWARD){
+            return v.scale(1,true);
+        }
+        if (fv == FaceIndex.FaceValue.BACK){
+            return v.scale(-1,true);
+        }
+        if (fv == FaceIndex.FaceValue.EVEN){
+            return v.scale(1,true);
+        }
+
+        Log.e("getVector","you must have changed the enum values in FaceValue");
+        return new Vector();
+
+
     }
 
 
@@ -77,12 +93,12 @@ public class SpinTo extends BitmapBacked {
         //spin the cube
         Log.i("spin","this:"+this);
         if (clicks ==1) {
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2, !flip);
         }else if (clicks ==2){
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2, !flip);
+            ((Tess)owner).rotate(startAt, dim1, dim2, !flip);
         }else if (clicks == -1){
-            ((Tess)owner).rotate(startAt, dim1, dim2,flip );
+            ((Tess)owner).rotate(startAt, dim1, dim2, flip);
         }
     }
 

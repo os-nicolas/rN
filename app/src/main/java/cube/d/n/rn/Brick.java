@@ -20,28 +20,28 @@ public class Brick extends BitmapBacked {
     final int dbColor;
 
     // bricks have a color for every pair of dimensions
-    HashMap<Index, Face> faces = new HashMap<>();
+    HashMap<FaceIndex, Face> faces = new HashMap<>();
 
 
     public Brick(Index i, Tess owner) {
         super(owner);
         this.owner = owner;
         owner.addBrick(i, this);
-        initFaces(new Index());
+        initFaces(new FaceIndex());
 
         Random r = new Random();
         dbColor = r.nextInt(0xffffff) + 0x88000000;
     }
 
-    private void initFaces(Index at) {
+    private void initFaces(FaceIndex at) {
         // for every pair of sides we need a face
         if (at.size() == owner.dim.get()) {
-            Index faceIndex = new Index(at);
+            FaceIndex faceIndex = new FaceIndex(at);
             Index ownerIndex = getIndex();
 
             // we zero out the place of face index in ownerIndex
             for (int i = 0; i < faceIndex.size(); i++) {
-                if (0 != faceIndex.get(i)) {
+                if (FaceIndex.FaceValue.NONE != faceIndex.get(i)) {
                     ownerIndex.set(i, 0);
                 }
             }
@@ -50,7 +50,7 @@ public class Brick extends BitmapBacked {
             for (int i = 0; i < ownerIndex.size(); i++) {
                 if (0 != ownerIndex.get(i) && owner.size.get() - 1 != ownerIndex.get(i)) {
                     ownerIndex.set(i, 0);
-                    faceIndex.set(i, 1);
+                    faceIndex.set(i, FaceIndex.FaceValue.EVEN);
                 }
             }
             if (faceIndex.noneZeroComps() == 2) {
@@ -59,20 +59,20 @@ public class Brick extends BitmapBacked {
 
         } else {
             if (at.noneZeroComps() < 2) {
-                Index temp1 = new Index(at);
+                FaceIndex temp1 = new FaceIndex(at);
                 if (getIndex().get(at.size()) == 0) {
-                    temp1.add(1);
+                    temp1.add(FaceIndex.FaceValue.FORWARD);
                     initFaces(temp1);
                 } else if (getIndex().get(at.size()) == owner.size.get() - 1) {
-                    temp1.add(-1);
+                    temp1.add(FaceIndex.FaceValue.BACK);
                     initFaces(temp1);
                 }
 
             }
             // if the number of noneZeroComps we need add is less than the number of spots we have left
 //            if (2-at.noneZeroComps() < owner.dim.get()-at.size()) {
-            Index temp2 = new Index(at);
-            temp2.add(0);
+            FaceIndex temp2 = new FaceIndex(at);
+            temp2.add(FaceIndex.FaceValue.NONE);
             initFaces(temp2);
 //            }
         }
@@ -125,8 +125,8 @@ public class Brick extends BitmapBacked {
         return new Index(owner.indexOf(this));
     }
 
-    public Index indexOf(Face face) {
-        for (Index i : faces.keySet()) {
+    public FaceIndex indexOf(Face face) {
+        for (FaceIndex i : faces.keySet()) {
             Face mine = faces.get(i);
             if (mine.equals(face)) {
                 return i;
@@ -136,30 +136,20 @@ public class Brick extends BitmapBacked {
     }
 
     public void rotateFaces(int dim1, int dim2, boolean direction) {
-        HashMap<Index, Face> toChange = new HashMap<>();
+        HashMap<FaceIndex, Face> toChange = new HashMap<>();
 
-        for (Index index : faces.keySet()) {
-            if (index.get(dim1) != 0 || index.get(dim2) != 0) {
+        for (FaceIndex index : faces.keySet()) {
                 toChange.put(index, faces.get(index));
-            }
         }
 
-        // now we remove
-        for (Index myIndex : toChange.keySet()) {
-            faces.remove(myIndex);
-        }
+        // we clear the hashMap
+        faces = new HashMap<>();
 
         // now we rotate and put them back
-        for (Index myIndex : toChange.keySet()) {
+        for (FaceIndex myIndex : toChange.keySet()) {
             Face myFace = toChange.get(myIndex);
-            Index newIndex = new Index(myIndex);
-            if (direction) {
-                newIndex.set(dim1, -myIndex.get(dim2));
-                newIndex.set(dim2, myIndex.get(dim1));
-            } else {
-                newIndex.set(dim1, myIndex.get(dim2));
-                newIndex.set(dim2, -myIndex.get(dim1));
-            }
+            FaceIndex newIndex = new FaceIndex(myIndex);
+            newIndex=newIndex.rotate(dim1,dim2,direction);
             faces.put(newIndex, myFace);
         }
         myInvalidate();
@@ -177,11 +167,11 @@ public class Brick extends BitmapBacked {
         ArrayList<SpinTo> result = new ArrayList<>();
         // we need to itterate over the ways we can spin
         // that is for every pair of dimensions
-        for (Index side : faces.keySet()) {
+        for (FaceIndex side : faces.keySet()) {
             // we can spin 1,2 or -1
             int[] spins = new int[]{1, 2, -1};
             for (int spin : spins) {
-                result.add(new SpinTo(this, new Index(side), spin, owner));
+                result.add(new SpinTo(this, new FaceIndex(side), spin, owner));
             }
 
         }
@@ -209,11 +199,11 @@ public class Brick extends BitmapBacked {
                 //TODO maybe faces should know how to draw themselves
 
                 // we need to get the compent vectors
+                ArrayList<FaceIndex.FaceValue> values = f.getIndex().getCompnetValues();
                 ArrayList<Vector> comps = f.getIndex().getCompnetVectors(hasVectorDims);
                 if (comps.size() < 2) {
                     Log.e("brick", "comps should be size 2");
                 }
-
 
                 for (Vector v : comps) {
                     v.toUnit(false).scale(radius / 2f, false);
@@ -223,7 +213,50 @@ public class Brick extends BitmapBacked {
                 p.setStrokeWidth(5);
                 p.setColor(f.getColor());
 
-//                float per = .1f;
+
+                float percent = .5f;
+
+                Vector far;
+                Vector home;
+                Vector left;
+                Vector right;
+
+                if (values.get(0) != FaceIndex.FaceValue.EVEN && values.get(1) != FaceIndex.FaceValue.EVEN) {
+                    far=startAt.add(comps.get(0), true).add(comps.get(1), false);
+                    home=startAt;
+                    left=startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true),false);
+                    right=startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false);
+                }else if (values.get(0) == FaceIndex.FaceValue.EVEN && values.get(1) != FaceIndex.FaceValue.EVEN){
+                    far=startAt.add(comps.get(1), true);
+                    home=startAt;
+                    left=startAt.add(comps.get(1), true).add(comps.get(0).scale(-percent, true), false);
+                    right=startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true),false);
+                }else if (values.get(0) != FaceIndex.FaceValue.EVEN && values.get(1) == FaceIndex.FaceValue.EVEN){
+                    far=startAt.add(comps.get(0), true);
+                    home=startAt;
+                    left=startAt.add(comps.get(0), true).add(comps.get(1).scale(-percent, true), false);
+                    right=startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true),false);
+                }else{
+                    far=startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false);
+                    home=startAt.add(comps.get(0).scale(-percent, true), true).add(comps.get(1).scale(-percent, true), false);
+                    left=startAt.add(comps.get(0).scale(-percent, true), true).add(comps.get(1).scale(percent, true), false);
+                    right=startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(-percent, true),false);
+                }
+
+                Util.drawLine(canvas,
+                        left,
+                        far, p);
+                Util.drawLine(canvas,
+                        right,
+                        far, p);
+                Util.drawLine(canvas,
+                        left,
+                        home, p);
+                Util.drawLine(canvas,
+                        right,
+                        home, p);
+
+                //                float per = .1f;
 //
 //                Vector myStartAt = new Vector(startAt);
 //                Index myIndex = getIndex();
@@ -269,21 +302,6 @@ public class Brick extends BitmapBacked {
 //                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(percent,true),false),
 //                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent,true),false), p);
 
-
-                float percent = .5f;
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1), false),
-                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
-                        startAt, p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-                        startAt, p);
-
 //                    Util.drawLine(canvas,
 //                            startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
 //                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
@@ -318,7 +336,23 @@ public class Brick extends BitmapBacked {
         for (int i = 0; i < myIndex.size(); i++) {
             if (myIndex.get(i).equals(otherIndex.get(i))) {
                 numberEqual++;
-                if (numberEqual >= owner.size.get() - 2) {
+                if (numberEqual >= owner.dim.get() - 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean sharesSpecificFace(Brick brick,Face f) {
+        // we share a face if two of the values in index are equal
+        int numberEqual = 0;
+        Index myIndex = getIndex();
+        Index otherIndex = brick.getIndex();
+        for (int i = 0; i < myIndex.size(); i++) {
+            if (myIndex.get(i).equals(otherIndex.get(i)) && f.getIndex().get(i) == FaceIndex.FaceValue.NONE) {
+                numberEqual++;
+                if (numberEqual >= owner.dim.get() - 2) {
                     return true;
                 }
             }

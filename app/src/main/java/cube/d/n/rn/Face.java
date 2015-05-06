@@ -13,13 +13,13 @@ public class Face {
     final Brick owner;
     private final int color;
 
-    public Face(Brick owner, Index faceIndex, Index ownerIndex){
+    public Face(Brick owner, FaceIndex faceIndex, Index ownerIndex){
         this.owner = owner;
         this.color = getColor(faceIndex, ownerIndex);
     }
 
     private static HashMap<ColorKey,Integer> colors = new HashMap<>();
-    private static int getColor(Index faceIndex, Index ownerIndex) {
+    private static int getColor(FaceIndex faceIndex, Index ownerIndex) {
 
         // now we make out ColorKey
         ColorKey myKey = new ColorKey(faceIndex,ownerIndex);
@@ -35,8 +35,8 @@ public class Face {
         return myColor;
     }
 
-    public Index getIndex() {
-        return owner.indexOf(this);
+    public FaceIndex getIndex() {
+        return new FaceIndex( owner.indexOf(this));
     }
 
     public int getColor() {
@@ -46,11 +46,11 @@ public class Face {
     public boolean sharesSide(Brick brick) {
         // if the owner index and bricks index are the same on everything except
         // the values where we have values
-        Index myIndex = getIndex();
+        FaceIndex myIndex = getIndex();
         Index ownersIndex = owner.getIndex();
         Index brickIndex = brick.getIndex();
         for (int i=0;i<myIndex.size();i++){
-            if (myIndex.get(i)==0){
+            if (myIndex.get(i)== FaceIndex.FaceValue.NONE){
                 if (!ownersIndex.get(i).equals(brickIndex.get(i))){
                     return false;
                 }

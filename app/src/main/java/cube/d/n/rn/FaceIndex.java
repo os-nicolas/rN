@@ -1,5 +1,7 @@
 package cube.d.n.rn;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 
@@ -9,6 +11,12 @@ import java.util.ArrayList;
  */
 public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
 
+    public static int enumSize() {
+        return FaceValue.values().length;
+    }
+
+
+
     public enum FaceValue {
         FORWARD,
         BACK,
@@ -16,27 +24,36 @@ public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
         NONE
     }
 
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
-    //TODO
+    public FaceIndex(FaceIndex index){
+        super();
+        for (FaceValue fv:index){
+            add(fv);
+        }
+    }
+
+    public FaceIndex(){
+        super();
+    }
 
     public ArrayList<Vector> getCompnetVectors(HasVectorDims tess) {
         ArrayList<Vector> result = new ArrayList<>();
 
         for (int i=0;i< size();i++){
             Vector vec=tess.vectorForDimension(i);
-            vec.scale(get(i),false);
-            if (vec.noneZero()) {
+            if (get(i)!= FaceValue.NONE){
+                vec.scale((get(i)==FaceValue.FORWARD?1:-1),false);
                 result.add(vec);
+            }
+        }
+        return result;
+    }
+
+    public ArrayList<FaceValue> getCompnetValues() {
+        ArrayList<FaceValue> result = new ArrayList<>();
+
+        for (int i=0;i< size();i++){
+            if (get(i)!= FaceValue.NONE){
+                result.add(get(i));
             }
         }
         return result;
@@ -46,9 +63,27 @@ public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
     public int hashCode() {
         int hashCode = 0;
         for (int i = 0; i < size(); i++) {
-            hashCode += (int)Math.pow(RN.rn().getMaxSize(),i) * get(i);
+            hashCode += (int)Math.pow(4,i) * toInt(get(i));
         }
         return hashCode;
+    }
+
+    private int toInt(FaceValue faceValue) {
+        if (faceValue!= FaceValue.NONE){
+            return 0;
+        }
+        if (faceValue!= FaceValue.FORWARD){
+            return 1;
+        }
+        if (faceValue!= FaceValue.BACK){
+            return 2;
+        }
+        if (faceValue!= FaceValue.EVEN){
+            return 3;
+        }
+
+        Log.e("toInt","enum not in the enum");
+        return -1;
     }
 
     @Override
@@ -67,7 +102,7 @@ public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
     @Override
     public String toString() {
         String result = "(";
-        for (Integer i: this){
+        for (FaceValue i: this){
             result += i + (indexOf(i)!=size()-1?",":"");
         }
         return result+")";
@@ -75,22 +110,39 @@ public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
 
     public int noneZeroComps() {
         int count = 0;
-        for (int i:this){
-            count += (i!=0?1:0);
+        for (FaceValue i:this){
+            count += (i!=FaceValue.NONE?1:0);
         }
         return count;
     }
 
-    public Index rotate(int dim1, int dim2, boolean direction,Tess owner) {
-        Index newIndex = new Index(this);
+    public FaceIndex rotate(int dim1, int dim2, boolean direction) {
+        FaceIndex newIndex = new FaceIndex(this);
         if (direction){
-            newIndex.set(dim1,owner.size.get()-1-this.get(dim2));
+            newIndex.set(dim1,flip(this.get(dim2)));
             newIndex.set(dim2,this.get(dim1));
         }else {
             newIndex.set(dim1,this.get(dim2));
-            newIndex.set(dim2,owner.size.get()-1-this.get(dim1));
+            newIndex.set(dim2,flip(this.get(dim1)));
         }
+        if(newIndex.getCompnetValues().size()<2){
+            Log.e("FaceIndex-rotate","rotated in to a mess");
+        }
+
         return newIndex;
+    }
+
+    public static FaceValue flip(FaceValue faceValue) {
+        if (faceValue== FaceValue.FORWARD){
+            return FaceValue.BACK;
+        }
+        if (faceValue== FaceValue.BACK){
+            return FaceValue.FORWARD;
+        }
+
+        //Log.e("FaceValue-flip","err! you probably changed FaceValue");
+
+        return faceValue;
     }
 
 }
