@@ -9,13 +9,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import java.util.ArrayList;
+
 /**
  * Created by Colin on 4/24/2015.
  */
 public class ButtonView extends View implements View.OnTouchListener {
     //TODO
     //TODO
-    SuperPrvate<Button> myB;
+    public GS<Button> myB;
 
     //TODO
     public ButtonView(Context context) {
@@ -26,11 +28,13 @@ public class ButtonView extends View implements View.OnTouchListener {
     private void init() {
         final ButtonView that = this;
 
-        myB= new SuperPrvate<Button>() {
+        myB= new GS<Button>() {
             @Override
             public void set(Button button) {
-                value = button;
-                value.setOwner(that);
+                super.set(button);
+                ArrayList<View> concernedViews = new ArrayList<>();
+                concernedViews.add(that);
+                value.setConcernedViews(concernedViews);
             }
             @Override
             public Button get() {
@@ -46,7 +50,7 @@ public class ButtonView extends View implements View.OnTouchListener {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        that.myB.set( new Button(0,0,getWidth(),getHeight(),that.myB.get().txt.get(),that));
+                        that.myB.set( new Button(0,0,getWidth(),getHeight(),that.myB.get().txt.get(),that,that.myB.get().action.get()));
                         that.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
                 }

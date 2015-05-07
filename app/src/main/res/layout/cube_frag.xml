@@ -19,38 +19,44 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
-            custom:mytext="test"/>
+            custom:mytext="none"
+            android:id="@+id/filter_clear"/>
 
         <cube.d.n.rn.ButtonView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            custom:mytext="1"
+            android:id="@+id/filter_1"/>
 
         <cube.d.n.rn.ButtonView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            custom:mytext="2"
+            android:id="@+id/filter_2"/>
 
         <cube.d.n.rn.ButtonView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            custom:mytext="3"
+            android:id="@+id/filter_3"/>
 
         <cube.d.n.rn.ButtonView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+             custom:mytext="4"
+            android:id="@+id/filter_4"/>
 
-        <cube.d.n.rn.ButtonView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1" />
     </LinearLayout>
 
     <cube.d.n.rn.Tess
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:id="@+id/tess"/>
 
     <LinearLayout
         android:layout_width="fill_parent"

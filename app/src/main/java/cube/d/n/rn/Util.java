@@ -23,4 +23,16 @@ public class Util {
         canvas.drawPicture(pd.getPicture());
         return bitmap;
     }
+
+    /**
+     * does not handle nulls at all
+     */
+    public  static <T> boolean in(T[] set, T value) {
+        for (T t: set){
+            if (t.equals(value)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

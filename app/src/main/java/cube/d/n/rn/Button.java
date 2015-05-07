@@ -35,7 +35,7 @@ public class Button extends BitmapBacked {
     Vector topLeft;
     float width;
     float height;
-    public GS<Action> action = new GS<>();
+    final public GS<Action> action = new GS<>();
 
 
     public Button(float left, float top, float right, float bot, String txt, View owner) {
@@ -99,10 +99,12 @@ public class Button extends BitmapBacked {
     }
 
     public void click(){
-        //if (action.get() != null && action.get().canAct()) {
+        if (action.get() != null && action.get().canAct()) {
+        Log.i("clicked",this.toString());
         setCurrentBuffer(2f);
-//        setTargetBuffer(2f);
-//            action.get().act();
+
+            action.get().act();
+        }
 
         Log.i("Button","click - " + currentBuffer );
         //}
