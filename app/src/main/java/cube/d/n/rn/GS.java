@@ -16,7 +16,6 @@ public class GS<T> implements Getter<T>, Setter<T>{
         getter.pointsTo(this);
     }
 
-
     public T get(){
         return value;
     }

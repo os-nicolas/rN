@@ -1,6 +1,5 @@
 package cube.d.n.rn;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -25,9 +24,9 @@ public class Button extends BitmapBacked {
     float targetBuffer = BaseBuffer;
     float currentBuffer = BaseBuffer;
 
-    public GS<String> txt =new GS<String>(""){
+    public GS<String> txt = new GS<String>("") {
         @Override
-        public void set(String newValue){
+        public void set(String newValue) {
             super.set(newValue);
             myInvalidate();
         }
@@ -46,8 +45,8 @@ public class Button extends BitmapBacked {
         this.txt.set(txt);
     }
 
-    public Button(float left, float top, float right, float bot, String txt, View owner,Action action) {
-        this(left, top, right, bot, txt,owner);
+    public Button(float left, float top, float right, float bot, String txt, View owner, Action action) {
+        this(left, top, right, bot, txt, owner);
         this.action.set(action);
     }
 
@@ -59,18 +58,18 @@ public class Button extends BitmapBacked {
         //if (action.get() != null && action.get().canAct()) {
         //    setTargetBuffer(6f);
 
-        Log.i("Button","hover - " + currentBuffer );
+        Log.i("Button", "hover - " + currentBuffer);
         //}
     }
 
     private void setCurrentBuffer(float cb) {
-        currentBuffer=cb*RN.rn().scale();
+        currentBuffer = cb * RN.rn().scale();
         myInvalidate();
     }
 
-//    private long lastChange = System.currentTimeMillis();
+    //    private long lastChange = System.currentTimeMillis();
     private void setTargetBuffer(float tb) {
-        targetBuffer=tb*RN.rn().scale();
+        targetBuffer = tb * RN.rn().scale();
         myInvalidate();
 //        lastChange = System.currentTimeMillis();
 //        final long  myChange = lastChange;
@@ -98,58 +97,53 @@ public class Button extends BitmapBacked {
 
     }
 
-    public void click(){
+    public void click() {
         if (action.get() != null && action.get().canAct()) {
-        Log.i("clicked",this.toString());
-        setCurrentBuffer(2f);
-
+            setCurrentBuffer(2f);
             action.get().act();
         }
-
-        Log.i("Button","click - " + currentBuffer );
-        //}
     }
 
     @Override
-    protected Bitmap updateBitmap(){
-        currentBuffer = ((RN.rn().rate()-1f)* currentBuffer + targetBuffer)/RN.rn().rate();
-        if (Math.abs(currentBuffer - targetBuffer) < .02){
+    protected Bitmap updateBitmap() {
+        currentBuffer = ((RN.rn().rate() - 1f) * currentBuffer + targetBuffer) / RN.rn().rate();
+        if (Math.abs(currentBuffer - targetBuffer) < .02) {
             currentBuffer = targetBuffer;
-        }else{
+        } else {
             myInvalidate();
         }
 
         Picture picture = new Picture();
-        Canvas canvas = picture.beginRecording((int)width, (int)height);
+        Canvas canvas = picture.beginRecording((int) width, (int) height);
 
         ArrayList<Vector> vectors = new ArrayList<>();
         // draw a hexagon
         // generating the lines takes a bit of work
-        for (float i=0;i<3;i++){
-            double angle= Math.PI*(i+.5)/(3);
-            Vector v = new Vector( (float)Math.sin(angle), (float)Math.cos(angle));
+        for (float i = 0; i < 3; i++) {
+            double angle = Math.PI * (i + .5) / (3);
+            Vector v = new Vector((float) Math.sin(angle), (float) Math.cos(angle));
             vectors.add(v);
         }
         float xSum = 0;
-        float ySum =0;
-        for (Vector v: vectors){
-            xSum+=Math.abs(v.x);
-            ySum+=Math.abs(v.y);
+        float ySum = 0;
+        for (Vector v : vectors) {
+            xSum += Math.abs(v.x);
+            ySum += Math.abs(v.y);
         }
 
         // first we do the side bros
-        for (Vector v: vectors){
-            if (Math.abs(v.y) >.1) {
-                v.x*= (-2*currentBuffer+height)/ySum;
+        for (Vector v : vectors) {
+            if (Math.abs(v.y) > .1) {
+                v.x *= (-2 * currentBuffer + height) / ySum;
                 edgeBit = v.x; // should be the same for all of these
-                v.y*= (-2*currentBuffer+height)/ySum;
+                v.y *= (-2 * currentBuffer + height) / ySum;
             }
 
         }
 
-        for (Vector v: vectors){
-            if (Math.abs(v.y) <.1) {
-                v.x = (width-2 * currentBuffer  - 2*edgeBit );
+        for (Vector v : vectors) {
+            if (Math.abs(v.y) < .1) {
+                v.x = (width - 2 * currentBuffer - 2 * edgeBit);
             }
         }
 
@@ -157,14 +151,14 @@ public class Button extends BitmapBacked {
         p.setColor(RN.rn().getDarkColor());
         p.setStrokeWidth(RN.rn().getStrokeWidth());
 
-        Vector at = new Vector(currentBuffer,height/2f);
-        for (Vector v: vectors){
+        Vector at = new Vector(currentBuffer, height / 2f);
+        for (Vector v : vectors) {
             Vector old = new Vector(at);
-            Util.drawLine(canvas,old,at.add(v,false),p);
+            Util.drawLine(canvas, old, at.add(v, false), p);
         }
-        for (Vector v: vectors){
+        for (Vector v : vectors) {
             Vector old = new Vector(at);
-            Util.drawLine(canvas,old,at.add(v.scale(-1,true),false),p);
+            Util.drawLine(canvas, old, at.add(v.scale(-1, true), false), p);
         }
 
         //now we need to draw the text centered
@@ -177,26 +171,26 @@ public class Button extends BitmapBacked {
             tp.getTextBounds(txt.get(), 0, txt.get().length(), out);
         }
 
-        canvas.drawText(txt.get(),(width/2f) - (out.width()/2f),(height/2f) + (out.height()/2f),tp);
+        canvas.drawText(txt.get(), (width / 2f) - (out.width() / 2f), (height / 2f) + (out.height() / 2f), tp);
 
         picture.endRecording();
 
         return Util.pictureDrawable2Bitmap(picture);
     }
 
-    public boolean in(Vector at){
+    public boolean in(Vector at) {
         // we model the body as a square
-        if ((at.y > topLeft.y && at.y < topLeft.y + height ) &&
-                (at.x > topLeft.x + edgeBit && at.x < topLeft.x + width - edgeBit)){
+        if ((at.y > topLeft.y && at.y < topLeft.y + height) &&
+                (at.x > topLeft.x + edgeBit && at.x < topLeft.x + width - edgeBit)) {
             return true;
         }
         // we model the ends as circles
-        Vector leftEnd = new Vector(topLeft.x+edgeBit,edgeBit);
-        if (leftEnd.distance(at)<edgeBit ){
+        Vector leftEnd = new Vector(topLeft.x + edgeBit, edgeBit);
+        if (leftEnd.distance(at) < edgeBit) {
             return true;
         }
-        Vector rightEnd = new Vector(topLeft.x+width-edgeBit,edgeBit);
-        if (rightEnd.distance(at)<edgeBit ){
+        Vector rightEnd = new Vector(topLeft.x + width - edgeBit, edgeBit);
+        if (rightEnd.distance(at) < edgeBit) {
             return true;
         }
         return false;

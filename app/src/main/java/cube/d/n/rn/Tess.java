@@ -12,14 +12,32 @@ import android.view.ViewTreeObserver;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import cube.d.n.rn.filter.Filter;
+
 /**
  * Created by Colin_000 on 4/17/2015.
  */
 public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
-    private HashMap<Index, Brick> bricks = new HashMap<>();
-    public GS<Integer> size = new GS<>();
-    public GS<Integer> dim = new GS<>();
+    public HashMap<Index, Brick> bricks = new HashMap<>();
+    final public GS<Integer> size = new GS<>();
+    final public GS<Integer> dim = new GS<>();
+
+    final public GS<Filter> filter = new GS<Filter>(){
+        @Override
+        public void set(Filter f){
+            super.set(f);
+            invalidateBricks();
+
+        }
+    };
+
+    private void invalidateBricks() {
+        for (Brick b: bricks.values()){
+            b.myInvalidate();
+        }
+    }
+
     private Vector startAt;
     ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
     ArrayList<Animation> animations = new ArrayList<>();
@@ -130,10 +148,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
         // draw outline
         Paint grey = new Paint();
-        grey.setColor(0x22888888);
+        grey.setColor(0x11888888);
         grey.setStrokeWidth(5);
         Paint black = new Paint();
-        black.setColor(0x66888888);
+        black.setColor(0x77888888);
         black.setStrokeWidth(5);
 
         for (Brick b : bricks.values()) {
@@ -144,7 +162,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                     // to a copy of b where at have an index of size
                     Index indexTo = new Index(index);
                     indexTo.set(at, size.get() - 1);
-                    if (active.get() != null && active.get().sharesFace(b) && active.get().sharesFace(bricks.get(indexTo))) {
+                    if ((active.get() != null && active.get().sharesFace(b) && active.get().sharesFace(bricks.get(indexTo)))
+                            ||(filter.get() != null && filter.get().drakLine(index,indexTo))){
                         Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), black);
                     } else {
                         Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), grey);
@@ -274,7 +293,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         return true;
     }
 
-    SuperPrvate<Brick> active = new SuperPrvate<Brick>() {
+    GS<Brick> active = new GS<Brick>() {
         @Override
         public void set(Brick newActive) {
             if (value != null) {
@@ -283,7 +302,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             if (newActive != null) {
                 newActive.myInvalidate();
             }
-            value = newActive;
+            super.set(newActive);
             if (value != null) {
                 spinTos = value.getSpinTos();
             } else {
@@ -305,28 +324,9 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
     }
 
 
+
     public boolean drawFace(Brick brick, Face f) {
-        Index i1 = new Index(new int[]{1, 0, 0, 1});
-        Index i2 = new Index(new int[]{1, 0, 1, 1});
-        Index i3 = new Index(new int[]{1, 1, 0, 1});
-
-        Index b1 = new Index(new int[]{0, 0, 1, 0});
-        Index b2 = new Index(new int[]{0, 1, 0, 0});
-        Index b3 = new Index(new int[]{0, 1, 1, 0});
-        Index b4 = new Index(new int[]{0, 1, 0, 1});
-        Index b5 = new Index(new int[]{1, 0, 1, 0});
-        Index b23 = new Index(new int[]{1, 1, 0, 0});
-
-        if ((bricks.get(i1).sharesSpecificFace(brick, f) ||
-                bricks.get(i2).sharesSpecificFace(brick, f) ||
-                bricks.get(i3).sharesSpecificFace(brick, f)) && (
-                !bricks.get(b1).sharesSpecificFace(brick, f) &&
-                        !bricks.get(b2).sharesSpecificFace(brick, f) &&
-                        !bricks.get(b3).sharesSpecificFace(brick, f) &&
-                        !bricks.get(b4).sharesSpecificFace(brick, f) &&
-                        !bricks.get(b5).sharesSpecificFace(brick, f)
-        )) {
-        } else {
+        if (filter.get() != null && filter.get().filter(brick,f)){
             return false;
         }
 

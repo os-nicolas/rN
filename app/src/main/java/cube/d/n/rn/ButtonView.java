@@ -32,9 +32,7 @@ public class ButtonView extends View implements View.OnTouchListener {
             @Override
             public void set(Button button) {
                 super.set(button);
-                ArrayList<View> concernedViews = new ArrayList<>();
-                concernedViews.add(that);
-                value.setConcernedViews(concernedViews);
+                value.setOwner(that);
             }
             @Override
             public Button get() {
