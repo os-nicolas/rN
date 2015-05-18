@@ -3,6 +3,7 @@ package cube.d.n.rn.filter;
 import cube.d.n.rn.Brick;
 import cube.d.n.rn.Face;
 import cube.d.n.rn.Index;
+import cube.d.n.rn.SpinTo;
 import cube.d.n.rn.Tess;
 import cube.d.n.rn.Util;
 
@@ -53,4 +54,5 @@ public class Filter1  extends Filter{
 
         return !(Util.in(bads, index) || Util.in(bads, indexTo));
     }
+
 }

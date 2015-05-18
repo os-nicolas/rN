@@ -59,6 +59,14 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
         Vector result = new Vector();
 
         float angle = getAnlge();
+        float alpha = (float) (0xff*angle/(Math.PI/2f));
+        for (Face f:brick.faces.values()){
+            if (((Tess)owner).drawFace(brick,f)){
+                f.alpha.set( Math.max(f.alpha.get(),alpha));
+            }else{
+                f.alpha.set( Math.min(f.alpha.get(),0xff-alpha));
+            }
+        }
 
         result.x = (float) (center.x+ fromArm.x*Math.cos(angle) + toArm.x*Math.sin(angle));
         result.y = (float) (center.y+ fromArm.y*Math.cos(angle) + toArm.y*Math.sin(angle));
@@ -66,6 +74,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
         drawBitmap(canvas, result.x -  brick.radius, result.y -  brick.radius, new Paint());
     }
 
+    // starts at 0 ends at pi/2
     private float getAnlge() {
         float angle = (System.currentTimeMillis()- startAt)/(float)runTime;
         angle = Math.min(angle, 1);

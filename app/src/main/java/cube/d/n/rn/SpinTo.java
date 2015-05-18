@@ -22,6 +22,9 @@ public class SpinTo extends BitmapBacked {
     public final int clicks;
     public final boolean flip;
 
+    public final Brick from;
+    public final FaceIndex plane;
+
     public SpinTo(Brick form, FaceIndex plane, int clicks,Tess owner){
         super(owner);
         //calculate vector
@@ -38,6 +41,9 @@ public class SpinTo extends BitmapBacked {
             myVector.add(v1.scale(.15f,true),false);
             myVector.add(v2.scale(1f,true),false);
         }
+
+        this.from = form;
+        this.plane = plane;
 
         startAt = form.getIndex();
         dim1 = getDim(plane, 0);
@@ -147,34 +153,29 @@ public class SpinTo extends BitmapBacked {
             myV2.scale(-1,false);
         }
 
-        float totalX = myV1.x + myV2.x;
 
-        if (Math.abs(totalX)< Math.abs(myV1.x)){
-            totalX = myV1.x;
-        }
-        if (Math.abs(totalX)< Math.abs(myV2.x)){
-            totalX = myV2.x;
-        }
-        float totalY = myV1.y + myV2.y;
+        // this looks crazy
+        // but it's really not
+        // the center is the center of the two lines
+        // center of the fist line is (myV1 + 0)/2
+        // center of the second line is ((myV2 + myV1) + myV1)/2
+        // and when we average those we get the below
+        float centerX = (myV1.x +myV1.x + myV1.x + myV2.x)/4f;
+        float centerY = (myV1.y +myV1.y + myV1.y + myV2.y)/4f;
 
-        if (Math.abs(totalY)< Math.abs(myV1.y)){
-            totalY = myV1.y;
-        }
-        if (Math.abs(totalY)< Math.abs(myV2.y)){
-            totalY = myV2.y;
-        }
-        startX = totalX/2f  - (Math.signum(myV1.x)  !=Math.signum(totalX) ?myV1.x:0);
-        startY = totalY/2f  - (Math.signum(myV1.y)  !=Math.signum(totalY) ?myV1.y:0);
 
-        canvas.drawLine(radius - (startX),
-                radius- (startY),
-                radius - (startX)+myV1.x,
-                radius - (startY)+myV1.y,p2);
+        startX = radius- centerX;
+        startY = radius- centerY;
+
+        canvas.drawLine( (startX),
+                (startY),
+                 (startX)+myV1.x,
+                 (startY)+myV1.y,p2);
         p2.setColor(0xffff0000);
-        canvas.drawLine(radius - (startX)+myV1.x,
-                radius- (startY)+myV1.y,
-                radius - (startX)+myV1.x + myV2.x,
-                radius - (startY)+myV1.y + myV2.y,p2);
+        canvas.drawLine( (startX)+myV1.x,
+                (startY)+myV1.y,
+                (startX)+myV1.x + myV2.x,
+                (startY)+myV1.y + myV2.y,p2);
 
         picture.endRecording();
 

@@ -141,18 +141,16 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             }
         }
 
-        // draw bricks
-        for (Brick b : bricks.values()) {
-            b.draw(canvas, 0xff);
-        }
-
         // draw outline
-        Paint grey = new Paint();
-        grey.setColor(0x11888888);
-        grey.setStrokeWidth(5);
-        Paint black = new Paint();
-        black.setColor(0x77888888);
-        black.setStrokeWidth(5);
+        Paint light = new Paint();
+        light.setColor(0x11888888);
+        light.setStrokeWidth(5);
+        Paint mid = new Paint();
+        mid.setColor(0x55888888);
+        mid.setStrokeWidth(5);
+        Paint dark = new Paint();
+        dark.setColor(0xBB888888);
+        dark.setStrokeWidth(5);
 
         for (Brick b : bricks.values()) {
             Index index = b.getIndex();
@@ -162,21 +160,29 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                     // to a copy of b where at have an index of size
                     Index indexTo = new Index(index);
                     indexTo.set(at, size.get() - 1);
-                    if ((active.get() != null && active.get().sharesFace(b) && active.get().sharesFace(bricks.get(indexTo)))
-                            ||(filter.get() != null && filter.get().drakLine(index,indexTo))){
-                        Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), black);
+                    if ((active.get() != null && active.get().sharesFace(b) && active.get().sharesFace(bricks.get(indexTo)))&&(filter.get() == null || filter.get().drakLine(index,indexTo))){
+                        Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), dark);
+                    }else if (filter.get() != null && filter.get().drakLine(index,indexTo)){
+                        Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), mid);
                     } else {
-                        Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), grey);
+                        Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), light);
                     }
                 }
             }
 
         }
 
+        // draw bricks
+        for (Brick b : bricks.values()) {
+            b.draw(canvas, 0xff);
+        }
+
         // draw spin tos
-//        for (SpinTo st: spinTos){
-//            st.draw(canvas);
-//        }
+        for (SpinTo st: spinTos){
+            if (drawSpinTo(st)) {
+                st.draw(canvas);
+            }
+        }
 
         long now = System.currentTimeMillis();
         float elapsedTime = (now - startTime) / 1000f;
@@ -323,21 +329,32 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         return new Vector(startAt);
     }
 
-
-
     public boolean drawFace(Brick brick, Face f) {
         if (filter.get() != null && filter.get().filter(brick,f)){
             return false;
         }
 
-        if (active.get() != null) {
-            if (active.get().sharesSpecificFace(brick, f)) {
-            } else {
-                return false;
-            }
-        }
+//        if (active.get() != null) {
+//            if (active.get().sharesSpecificFace(brick, f)) {
+//            } else {
+//                return false;
+//            }
+//        }
         return true;
     }
 
+    private boolean drawSpinTo(SpinTo st) {
+        if (filter.get() != null && filter.get().filter(st)){
+            return false;
+        }
+
+//        if (active.get() != null) {
+//            if (active.get().sharesSpecificFace(brick, f)) {
+//            } else {
+//                return false;
+//            }
+//        }
+        return true;
+    }
 
 }

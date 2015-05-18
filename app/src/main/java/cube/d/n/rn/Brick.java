@@ -20,7 +20,7 @@ public class Brick extends BitmapBacked {
     final int dbColor;
 
     // bricks have a color for every pair of dimensions
-    HashMap<FaceIndex, Face> faces = new HashMap<>();
+    public HashMap<FaceIndex, Face> faces = new HashMap<>();
 
 
     public Brick(Index i, Tess owner) {
@@ -196,6 +196,18 @@ public class Brick extends BitmapBacked {
         //float scale =.15f;
         for (Face f : faces.values()) {
             if (owner.drawFace(this, f)) {
+                f.targetAlpha.set((float)0xff);
+            }else{
+                f.targetAlpha.set((float)0x00);
+            }
+            if (Math.abs(f.alpha.get() - f.targetAlpha.get())>.1) {
+                float fast = (RN.rn().rate()/2f);
+                f.alpha.set((f.alpha.get() *fast  + f.targetAlpha.get()) / (fast + 1));
+                myInvalidate();
+            }else{
+                f.alpha.set(f.targetAlpha.get());
+            }
+
                 //TODO maybe faces should know how to draw themselves
 
                 // we need to get the compent vectors
@@ -212,6 +224,7 @@ public class Brick extends BitmapBacked {
                 Paint p = new Paint();
                 p.setStrokeWidth(5);
                 p.setColor(f.getColor());
+                p.setAlpha((int) (f.alpha.get()+0));
 
 
                 float percent = .5f;
@@ -318,8 +331,6 @@ public class Brick extends BitmapBacked {
                 //Util.drawLine(canvas,startAt.addAsNew(comps.get(1)),startAt,p);
 
                 //scale +=.05f;
-
-            }
 
         }
 

@@ -12,13 +12,17 @@ public class Face {
 
     final Brick owner;
     private final int color;
+    final FaceIndex faceIndex;
+    public final GS<Float> targetAlpha = new GS<Float>((float)0xff);
+    public final GS<Float> alpha = new GS<Float>((float)0xff);
 
     public Face(Brick owner, FaceIndex faceIndex, Index ownerIndex){
         this.owner = owner;
+        this.faceIndex = faceIndex;
         this.color = getColor(faceIndex, ownerIndex);
     }
 
-    private static HashMap<ColorKey,Integer> colors = new HashMap<>();
+    public static HashMap<ColorKey,Integer> colors = new HashMap<>();
     private static int getColor(FaceIndex faceIndex, Index ownerIndex) {
 
         // now we make out ColorKey

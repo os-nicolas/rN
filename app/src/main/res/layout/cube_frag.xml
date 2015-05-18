@@ -50,6 +50,13 @@
              custom:mytext="4"
             android:id="@+id/filter_4"/>
 
+        <cube.d.n.rn.ButtonView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            custom:mytext="color"
+            android:id="@+id/filter_color"/>
+
     </LinearLayout>
 
     <cube.d.n.rn.Tess
