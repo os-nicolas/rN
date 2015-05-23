@@ -31,6 +31,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
         }
     };
+    private final ArrayList<OnScreenButton> filterButtons = new ArrayList<>();
 
     private void invalidateBricks() {
         for (Brick b: bricks.values()){
@@ -62,16 +63,38 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                     public void onGlobalLayout() {
                         intiDimVectors(getWidth(), getHeight());
                         that.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                        //init the filters buttons
+                        final int end = that.size.get()-1;
+                        Index current = new Index(new int[]{0,0,0,0});
+                        for (int at=0;at<that.dim.get();at++){
+                            current = new Index(current);
+                            current.set(at,end);
+                            filterButtons.add(new CornoreFilterButton(that,current));
+                            filterButtons.add(new EdgeFilterButton(that,at,end));
+                        }
+                        for (int at=0;at<that.dim.get();at++){
+                            current = new Index(current);
+                            current.set(at,0);
+                            filterButtons.add(new CornoreFilterButton(that,current));
+                            filterButtons.add(new EdgeFilterButton(that,at,0));
+                        }
                     }
                 }
         );
+
+
+
+
+
+
 
         this.setOnTouchListener(this);
     }
 
     public Tess(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(4, 2);
+        init(4, 3);
     }
 
     public void rotate(Index startAt, int dim1, int dim2, boolean direction) {
@@ -155,7 +178,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         for (Brick b : bricks.values()) {
             Index index = b.getIndex();
             for (int at = 0; at < index.size(); at++) {
-                if (index.get(at) == 0) {
+                if (isCorner(index) && index.get(at) == 0) {
                     // when the index is zero draw a line from b to
                     // to a copy of b where at have an index of size
                     Index indexTo = new Index(index);
@@ -184,6 +207,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             }
         }
 
+        for (OnScreenButton osb: filterButtons){
+            osb.draw(canvas);
+        }
+
         long now = System.currentTimeMillis();
         float elapsedTime = (now - startTime) / 1000f;
         frames++;
@@ -192,6 +219,16 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         }
 
         invalidate();
+    }
+
+    private boolean isCorner(Index index) {
+        for (int at = 0; at < index.size(); at++) {
+            if (index.get(at)!=0 && index.get(at)!=size.get()-1){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public Index indexOf(Brick brick) {
@@ -271,23 +308,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                     justSelected = true;
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                Vector eventAt = new Vector(event);
-                SpinTo closest = null;
-                float minDis = Float.MAX_VALUE;
-                for (SpinTo st : spinTos) {
-                    if (st.in(eventAt)) {
-                        float myDistance = st.distance(eventAt);
-                        if (myDistance < minDis) {
-                            closest = st;
-                            minDis = myDistance;
-                        }
-                    }
+                // did they click a spin to?
+                boolean keepGoing = clickSpinTos(event);
+                // did they click a filter?
+                if (keepGoing){
+                    keepGoing = clickFileters(event);
                 }
-                if (closest != null) {
-                    Log.i("spintTo", closest + "");
-                    closest.go();
-                    active.set(null);
-                }
+
                 if (!justSelected) {
                     active.set(null);
                 }
@@ -295,6 +322,50 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             }
         } else {
             dead = true;
+        }
+        return true;
+    }
+
+    private boolean clickFileters(MotionEvent event) {
+        Vector eventAt = new Vector(event);
+        OnScreenButton closest = null;
+        float minDis = Float.MAX_VALUE;
+        for (OnScreenButton st : filterButtons) {
+            if (st.in(eventAt)) {
+                float myDistance = st.distance(eventAt);
+                if (myDistance < minDis) {
+                    closest = st;
+                    minDis = myDistance;
+                }
+            }
+        }
+        if (closest != null) {
+            Log.i("filter", closest + "");
+            closest.go();
+            active.set(null);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean clickSpinTos(MotionEvent event) {
+        Vector eventAt = new Vector(event);
+        SpinTo closest = null;
+        float minDis = Float.MAX_VALUE;
+        for (SpinTo st : spinTos) {
+            if (st.in(eventAt)) {
+                float myDistance = st.distance(eventAt);
+                if (myDistance < minDis) {
+                    closest = st;
+                    minDis = myDistance;
+                }
+            }
+        }
+        if (closest != null) {
+            Log.i("spintTo", closest + "");
+            closest.go();
+            active.set(null);
+            return false;
         }
         return true;
     }

@@ -92,8 +92,8 @@ public class Brick extends BitmapBacked {
     }
 
     @Override
-    public Bitmap updateBitmap() {
-        return getBitmap(owner);
+    public Bitmap updateBitmap(Bitmap old) {
+        return getBitmap(owner, old);
     }
 
     public void draw(Canvas canvas, int alpha) {
@@ -182,7 +182,7 @@ public class Brick extends BitmapBacked {
         return getIndex().getVector(owner);
     }
 
-    public Bitmap getBitmap(HasVectorDims hasVectorDims) {
+    public Bitmap getBitmap(HasVectorDims hasVectorDims, Bitmap old) {
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int) (2 * radius), (int) (2 * radius));
 
@@ -200,13 +200,13 @@ public class Brick extends BitmapBacked {
             }else{
                 f.targetAlpha.set((float)0x00);
             }
-            if (Math.abs(f.alpha.get() - f.targetAlpha.get())>.1) {
-                float fast = (RN.rn().rate()/2f);
-                f.alpha.set((f.alpha.get() *fast  + f.targetAlpha.get()) / (fast + 1));
-                myInvalidate();
-            }else{
+//            if (Math.abs(f.alpha.get() - f.targetAlpha.get())>.1) {
+//                float fast = (RN.rn().rate()/2f);
+//                f.alpha.set((f.alpha.get() *fast  + f.targetAlpha.get()) / (fast + 1));
+//                myInvalidate();
+//            }else{
                 f.alpha.set(f.targetAlpha.get());
-            }
+//            }
 
                 //TODO maybe faces should know how to draw themselves
 
@@ -336,7 +336,7 @@ public class Brick extends BitmapBacked {
 
         picture.endRecording();
 
-        return Util.pictureDrawable2Bitmap(picture);
+        return Util.pictureDrawable2Bitmap(picture,old);
     }
 
     public boolean sharesFace(Brick brick) {

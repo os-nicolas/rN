@@ -32,13 +32,13 @@ public abstract class BitmapBacked {
         if (dirty){
             // we set dirty to false first so animating objects can set it to true again in updateBitmap
             dirty= false;
-            myBitmap = updateBitmap();
+            myBitmap = updateBitmap(myBitmap);
 
         }
         canvas.drawBitmap(myBitmap,x,y,paint);
     }
 
-    protected abstract Bitmap updateBitmap() ;
+    protected abstract Bitmap updateBitmap(Bitmap old) ;
 
     public void setOwner(View view) {
         owner = view;

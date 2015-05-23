@@ -2,8 +2,10 @@ package cube.d.n.rn;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.PictureDrawable;
 
 /**
@@ -16,10 +18,13 @@ public class Util {
     }
 
     //Convert Picture to Bitmap
-    public static Bitmap pictureDrawable2Bitmap(Picture picture) {
+    public static Bitmap pictureDrawable2Bitmap(Picture picture,Bitmap bitmap) {
         PictureDrawable pd = new PictureDrawable(picture);
-        Bitmap bitmap = Bitmap.createBitmap(pd.getIntrinsicWidth(), pd.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        if (bitmap == null) {
+            bitmap = Bitmap.createBitmap(pd.getIntrinsicWidth(), pd.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
         Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.drawPicture(pd.getPicture());
         return bitmap;
     }

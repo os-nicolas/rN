@@ -105,7 +105,7 @@ public class Button extends BitmapBacked {
     }
 
     @Override
-    protected Bitmap updateBitmap() {
+    protected Bitmap updateBitmap(Bitmap oldbitmap) {
         currentBuffer = ((RN.rn().rate() - 1f) * currentBuffer + targetBuffer) / RN.rn().rate();
         if (Math.abs(currentBuffer - targetBuffer) < .02) {
             currentBuffer = targetBuffer;
@@ -175,7 +175,7 @@ public class Button extends BitmapBacked {
 
         picture.endRecording();
 
-        return Util.pictureDrawable2Bitmap(picture);
+        return Util.pictureDrawable2Bitmap(picture,oldbitmap);
     }
 
     public boolean in(Vector at) {

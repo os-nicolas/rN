@@ -28,8 +28,8 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
 
 
     @Override
-    public Bitmap updateBitmap(){
-        return brick.getBitmap(this);
+    public Bitmap updateBitmap(Bitmap old){
+        return brick.getBitmap(this,old);
     }
 
     public void draw(Canvas canvas) {

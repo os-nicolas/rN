@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import cube.d.n.rn.Action;
 import cube.d.n.rn.ButtonView;
+import cube.d.n.rn.Index;
 import cube.d.n.rn.R;
 import cube.d.n.rn.Tess;
 import cube.d.n.rn.filter.ColorFilter;
@@ -20,6 +21,7 @@ import cube.d.n.rn.filter.Filter1;
 import cube.d.n.rn.filter.Filter2;
 import cube.d.n.rn.filter.Filter3;
 import cube.d.n.rn.filter.Filter4;
+import cube.d.n.rn.filter.cornorFilter;
 
 
 public class CubeFrag extends Fragment {
@@ -43,32 +45,33 @@ public class CubeFrag extends Fragment {
 
             }
         });
+        final int end=tess.size.get()-1;
         ButtonView filter1= (ButtonView)rootView.findViewById(R.id.filter_1);
         filter1.myB.get().action.set(new Action() {
             @Override
             public void act() {
-                tess.filter.set(new Filter1(tess));
+                tess.filter.set(new cornorFilter(tess,new Index(new int[]{0, 0, 0, 0})));
             }
         });
         ButtonView filter2= (ButtonView)rootView.findViewById(R.id.filter_2);
         filter2.myB.get().action.set(new Action() {
             @Override
             public void act() {
-                tess.filter.set(new Filter2(tess));
+                tess.filter.set(new cornorFilter(tess,new Index(new int[]{end, 0, 0, 0})));
             }
         });
         ButtonView filter3= (ButtonView)rootView.findViewById(R.id.filter_3);
         filter3.myB.get().action.set(new Action() {
             @Override
             public void act() {
-                tess.filter.set(new Filter3(tess));
+                tess.filter.set(new cornorFilter(tess,new Index(new int[]{end, end, 0, 0})));
             }
         });
         ButtonView filter4= (ButtonView)rootView.findViewById(R.id.filter_4);
         filter4.myB.get().action.set(new Action() {
             @Override
             public void act() {
-                tess.filter.set(new Filter4(tess));
+                tess.filter.set(new cornorFilter(tess,new Index(new int[]{end, end, end, 0})));
             }
         });
         ButtonView filterColor= (ButtonView)rootView.findViewById(R.id.filter_color);

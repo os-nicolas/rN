@@ -126,7 +126,7 @@ public class SpinTo extends BitmapBacked {
     }
 
     @Override
-    protected Bitmap updateBitmap() {
+    protected Bitmap updateBitmap(Bitmap old) {
 
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int)(2*radius), (int)(2*radius));
@@ -179,6 +179,6 @@ public class SpinTo extends BitmapBacked {
 
         picture.endRecording();
 
-        return Util.pictureDrawable2Bitmap(picture);
+        return Util.pictureDrawable2Bitmap(picture,old);
     }
 }

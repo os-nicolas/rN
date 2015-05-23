@@ -16,17 +16,21 @@ public class Filter1  extends Filter{
         super(owner);
     }
 
+
+
+
     @Override
     public boolean filter(Brick brick, Face f) {
-        Index i1 = new Index(new int[]{1, 0, 0, 1});
-        Index i2 = new Index(new int[]{1, 0, 1, 1});
-        Index i3 = new Index(new int[]{1, 1, 0, 1});
+        int end=owner.size.get()-1;
+        Index i1 = new Index(new int[]{end, 0, 0, end});
+        Index i2 = new Index(new int[]{end, 0, end, end});
+        Index i3 = new Index(new int[]{end, end, 0, end});
 
-        Index b1 = new Index(new int[]{0, 0, 1, 0});
-        Index b2 = new Index(new int[]{0, 1, 0, 0});
-        Index b3 = new Index(new int[]{0, 1, 1, 0});
-        Index b4 = new Index(new int[]{0, 1, 0, 1});
-        Index b5 = new Index(new int[]{1, 0, 1, 0});
+        Index b1 = new Index(new int[]{0, 0, end, 0});
+        Index b2 = new Index(new int[]{0, end, 0, 0});
+        Index b3 = new Index(new int[]{0, end, end, 0});
+        Index b4 = new Index(new int[]{0, end, 0, end});
+        Index b5 = new Index(new int[]{end, 0, end, 0});
 
         if ((owner.bricks.get(i1).sharesSpecificFace(brick, f) ||
                 owner.bricks.get(i2).sharesSpecificFace(brick, f) ||
