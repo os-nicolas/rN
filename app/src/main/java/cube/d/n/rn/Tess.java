@@ -287,6 +287,12 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        return onTouch(event);
+
+
+    }
+
+    public boolean onTouch(MotionEvent event) {
         if (event.getPointerCount() == 1 && (!dead || event.getAction() == MotionEvent.ACTION_DOWN)) {
             if (event.getAction() == MotionEvent.ACTION_DOWN && active.get() == null) {
                 Brick closest = null;
@@ -428,4 +434,11 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         return true;
     }
 
+    public void draw(DrawInfo base) {
+        //TODO
+    }
+
+    public void setBounds(int i, int i1, int width, int height, DrawInfo base) {
+        //TODO
+    }
 }
