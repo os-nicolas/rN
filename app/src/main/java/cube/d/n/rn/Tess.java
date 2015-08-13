@@ -3,6 +3,7 @@ package cube.d.n.rn;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -61,13 +62,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         // find the set of points we are going to rotate
         // uses the og indexs
         HashMap<Index,Brick> toRotate = new HashMap<>();
-        for (int i=0;i<size.get();i++){
-            for (int j=0;j<size.get();j++){
+        for (int i=0;i<size.get();i++) {
+            for (int j = 0; j < size.get(); j++) {
                 Index myIndex = new Index(startAt);
-                myIndex.set(dim1,i);
-                myIndex.set(dim2,j);
+                myIndex.set(dim1, i);
+                myIndex.set(dim2, j);
                 Brick myBrick = bricks.get(myIndex);
-                toRotate.put(myIndex,myBrick);
+                toRotate.put(myIndex, myBrick);
             }
         }
 
@@ -130,10 +131,15 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
             }
         }
 
+        // draw spin tos
+        for (SpinTo st: spinTos){
+            st.draw(canvas);
+        }
+
         // draw outline
         Paint grey = new Paint();
-        grey.setColor(0x22888888);
-        grey.setStrokeWidth(5);
+        grey.setColor(0x88ffffff);
+        grey.setStrokeWidth(20);
         Paint black = new Paint();
         black.setColor(0xff000000);
         black.setStrokeWidth(5);
@@ -149,12 +155,18 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
                     Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), grey);
                 }
             }
-
         }
 
-        // draw spin tos
-        for (SpinTo st: spinTos){
-            st.draw(canvas);
+        Paint red = new Paint();
+        red.setColor(0x88ff0000);
+        red.setStrokeWidth(30);
+
+        // draw the path we are outlining
+        for (int i =0;i<path.size()-1;i++){
+            Util.drawLine(canvas,path.get(i).getVector(),path.get(i+1).getVector(),red);
+        }
+        if (path.size() != 0 && current != null && path.size() < dim.get()-1){
+            Util.drawLine(canvas,path.get(path.size()-1).getVector(),current,red);
         }
 
         long now = System.currentTimeMillis();
@@ -194,16 +206,16 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
         }
 
         // scale the vectors to fit in the screen
-        float xSum = 0;
-        float ySum =0;
+        float xSum = 1;
+        float ySum =1;
         for (Vector v: dimensionVectors.values()){
             xSum+=Math.abs(v.x)*(size.get()-1);
             ySum+=Math.abs(v.y)*(size.get()-1);
         }
-        float buffer = 30;//TODO scale by dpi
+        //float buffer = 30;//TODO scale by dpi
         scale = Math.min(
-                (width - 2 * buffer) / xSum,
-                (height - 2 * buffer) / ySum);
+                (width ) / xSum,//- 2 * buffer
+                (height) / ySum);// - 2 * buffer
 
         for (Vector v:dimensionVectors.values()){
             v.scale(scale,false);
@@ -218,13 +230,117 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
     }
 
     boolean dead= false;
-    boolean justSelected =false;
+    ArrayList<Brick> path = new ArrayList<>();
+    Vector current;
+//    boolean justSelected =false;
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getPointerCount()==1 && (!dead || event.getAction() == MotionEvent.ACTION_DOWN)){
-            if (event.getAction() == MotionEvent.ACTION_DOWN && active.get() == null){
-                Brick closest=null;
-                float minDis = Float.MAX_VALUE;
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                dead = false;
+                path = new ArrayList<Brick>();
+            }
+            Brick closeBrick =  nearAny(event);
+                if (closeBrick == null) {
+                }else if (path.contains(closeBrick)){
+                    // remove everything after closet
+                    for (int i = path.size()-1;i> path.indexOf(closeBrick);i--){
+                        path.remove(i);
+                    }
+                }else if (path.size() == dim.get()-1&&dim.get()-2 >=0 && legalNext(path.get(dim.get()-2),closeBrick) ){
+                    path.set(dim.get()-2,closeBrick);
+                }else if (legalNext(closeBrick)){
+                    path.add(closeBrick);
+                }
+                Vector myPoint = new Vector(event);
+                current = myPoint;
+
+            if (event.getAction() == MotionEvent.ACTION_UP){
+                //we have to actully do the spin
+                path = new ArrayList<Brick>();
+                current = null;
+            }
+        }else {
+            dead = true;
+        }
+
+
+//        if (event.getPointerCount()==1 && (!dead || event.getAction() == MotionEvent.ACTION_DOWN)){
+//            if (event.getAction() == MotionEvent.ACTION_DOWN && active.get() == null){
+//                Brick closest=null;
+//                float minDis = Float.MAX_VALUE;
+//                Vector eventAt = new Vector(event);
+//                dead = false;
+//                for (Brick b: bricks.values()){
+//                    if (b.in(eventAt)){
+//                        float myDistance = b.distance(eventAt);
+//                        if (myDistance < minDis){
+//                            closest=b;
+//                            minDis= myDistance;
+//                        }
+//                    }
+//                }
+//                if (closest != null){
+//                    Log.i("new Active", closest + "");
+//                    active.set(closest);
+//                    justSelected = true;
+//                }
+//            }else if (event.getAction() == MotionEvent.ACTION_UP){
+//                Vector eventAt = new Vector(event);
+//                SpinTo closest=null;
+//                float minDis = Float.MAX_VALUE;
+//                for (SpinTo st: spinTos){
+//                    if (st.in(eventAt)){
+//                        float myDistance = st.distance(eventAt);
+//                        if (myDistance < minDis){
+//                            closest=st;
+//                            minDis= myDistance;
+//                        }
+//                    }
+//                }
+//                if (closest != null){
+//                    Log.i("spintTo", closest + "");
+//                    closest.go();
+//                    active.set(null);
+//                }
+//                if (!justSelected){
+//                    active.set(null);
+//                }
+//                justSelected = false;
+//            }
+//        }else {
+//            dead = true;
+//        }
+        return true;
+    }
+
+    private boolean legalNext(Brick closeBrick) {
+        if (path.size() ==0){
+            return true;
+        }else{
+            Brick pathEnd =path.get(path.size()-1);
+            return legalNext( pathEnd, closeBrick);
+        }
+    }
+
+    private boolean legalNext( Brick pathEnd,Brick closeBrick) {
+        if (path.size() ==0){
+            return true;
+        }else{
+            int same = 0;
+            for (int at =0;at<closeBrick.getIndex().size();at++){
+                if (closeBrick.getIndex().get(at).equals(pathEnd.getIndex().get(at))) {
+                    same++;
+                }
+            }
+
+            return same == closeBrick.getIndex().size()-1;
+        }
+    }
+
+    private Brick nearAny(MotionEvent event) {
+        Brick closest= null;
+        float minDis = Float.MAX_VALUE;
                 Vector eventAt = new Vector(event);
                 dead = false;
                 for (Brick b: bricks.values()){
@@ -236,38 +352,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims{
                         }
                     }
                 }
-                if (closest != null){
-                    Log.i("new Active", closest + "");
-                    active.set(closest);
-                    justSelected = true;
-                }
-            }else if (event.getAction() == MotionEvent.ACTION_UP){
-                Vector eventAt = new Vector(event);
-                SpinTo closest=null;
-                float minDis = Float.MAX_VALUE;
-                for (SpinTo st: spinTos){
-                    if (st.in(eventAt)){
-                        float myDistance = st.distance(eventAt);
-                        if (myDistance < minDis){
-                            closest=st;
-                            minDis= myDistance;
-                        }
-                    }
-                }
-                if (closest != null){
-                    Log.i("spintTo", closest + "");
-                    closest.go();
-                    active.set(null);
-                }
-                if (!justSelected){
-                    active.set(null);
-                }
-                justSelected = false;
-            }
-        }else {
-            dead = true;
-        }
-        return true;
+
+        return closest;
     }
 
     SuperPrvate<Brick> active = new SuperPrvate<Brick>() {

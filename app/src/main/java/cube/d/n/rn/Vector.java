@@ -2,6 +2,8 @@ package cube.d.n.rn;
 
 import android.view.MotionEvent;
 
+import java.util.Objects;
+
 /**
  * Created by Colin_000 on 4/17/2015.
  */
@@ -66,4 +68,18 @@ public class Vector {
         return scale(scaleBy,asNew);
     }
 
+    @Override
+    public int hashCode() {
+        return (int)x + (int)y;
+    }
+
+    @Override
+    public boolean equals(Object other){
+        if (!(other instanceof Vector)){
+            return false;
+        }
+        Vector vother = (Vector)other;
+
+        return vother.x == x && vother.y ==y;
+    }
 }

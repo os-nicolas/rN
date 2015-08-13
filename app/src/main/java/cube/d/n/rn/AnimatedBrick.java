@@ -29,7 +29,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
 
     @Override
     public Bitmap updateBitmap(){
-        return brick.getBitmap(this);
+        return brick.getBitmap();
     }
 
     public void draw(Canvas canvas) {
@@ -37,7 +37,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
             startAt = System.currentTimeMillis();
         }
 
-        myInvalidate();
+        //myInvalidate();
         Vector to = brick.getIndex().getVector(brick.owner);
         if (next !=null){
             to = brick.getIndex().rotate(dim1,dim2,!direction,brick.owner).getVector(brick.owner);

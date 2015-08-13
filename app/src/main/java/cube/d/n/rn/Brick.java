@@ -2,6 +2,7 @@ package cube.d.n.rn;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.util.Log;
@@ -16,8 +17,9 @@ import java.util.Random;
  */
 public class Brick extends BitmapBacked {
     final public Tess owner;
-    final float radius = 100f;
+    final float radius = 50f;
     final int dbColor;
+    final Index startIndex;
 
     // bricks have a color for every pair of dimensions
     HashMap<Index, Face> faces = new HashMap<>();
@@ -27,6 +29,7 @@ public class Brick extends BitmapBacked {
         super(owner);
         this.owner = owner;
         owner.addBrick(i, this);
+        startIndex = new Index(i);
         initFaces(new Index());
 
         Random r = new Random();
@@ -93,7 +96,7 @@ public class Brick extends BitmapBacked {
 
     @Override
     public Bitmap updateBitmap() {
-        return getBitmap(owner);
+        return getBitmap();
     }
 
     public void draw(Canvas canvas, int alpha) {
@@ -192,7 +195,7 @@ public class Brick extends BitmapBacked {
         return getIndex().getVector(owner);
     }
 
-    public Bitmap getBitmap(HasVectorDims hasVectorDims) {
+    public Bitmap getBitmap() {
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int) (2 * radius), (int) (2 * radius));
 
@@ -202,108 +205,66 @@ public class Brick extends BitmapBacked {
         grey.setColor(dbColor);
         //canvas.drawCircle(startAt.x,startAt.y,(isActive()?radius:radius/2f),grey);
 
+        Paint p = new Paint();
+        p.setStrokeWidth(5);
+        p.setColor(Color.BLACK);
 
-        //float scale =.15f;
-        for (Face f : faces.values()) {
-            if (owner.drawFace(this, f)) {
-                //TODO maybe faces should know how to draw themselves
-
-                // we need to get the compent vectors
-                ArrayList<Vector> comps = f.getIndex().getCompnetVectors(hasVectorDims);
-                if (comps.size() < 2) {
-                    Log.e("brick", "comps should be size 2");
-                }
-
-
-                for (Vector v : comps) {
-                    v.toUnit(false).scale(radius / 2f, false);
-                }
-
-                Paint p = new Paint();
-                p.setStrokeWidth(5);
-                p.setColor(f.getColor());
-
-//                float per = .1f;
-//
-//                Vector myStartAt = new Vector(startAt);
-//                Index myIndex = getIndex();
-//                for (int i=0;i<myIndex.size();i++){
-//                    if (f.getIndex().get(i).equals(new Integer(0))){
-//                        if (myIndex.get(i).equals(new Integer(0))){
-//                            myStartAt.add(owner.vectorForDimension(i).scale(-per,false),false);
-//                        }else if (myIndex.get(i).equals(new Integer(owner.size.get()-1))){
-//                            myStartAt.add(owner.vectorForDimension(i).scale(per,false),false);
-//                        }
-//                    }
-//
-//                }
-//
-//                Util.drawLine(canvas,
-//                        myStartAt,
-//                        myStartAt.add(comps.get(0), true), p);
-//                Util.drawLine(canvas,
-//                        myStartAt,
-//                        myStartAt.add(comps.get(1), true), p);
-
-
-//            Vector v = startAt.add(comps.get(0),true).add(comps.get(1),false);
-//            canvas.drawCircle(v.x,v.y,10,p);
-
-
-//            Util.drawLine(canvas,
-//                    startAt.add(comps.get(0),true).add(comps.get(1),false),
-//                    startAt, p);
-//                float percent = 1f;
-//                float back = -.5f;
-
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent,true),false),
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(back*percent,true),false), p);
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(back*percent,true),false),
-//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(back*percent,true),false), p);
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(back*percent,true),false),
-//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(percent,true),false), p);
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(0).scale(back*percent, true), true).add(comps.get(1).scale(percent,true),false),
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent,true),false), p);
-
-
-                float percent = .5f;
+        for (int at=0;at<startIndex.size();at++){
+            int valueAt = startIndex.get(at);
+            if (valueAt !=0){
+                // we draw a line down from the center
                 Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1), false),
-                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
-                        startAt, p);
-                Util.drawLine(canvas,
-                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-                        startAt, p);
+                        startAt,
+                        startAt.add(owner.vectorForDimension(at).scale(-radius, true), true), p);
 
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
-//                    Util.drawLine(canvas,
-//                            startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-//                            startAt.add(comps.get(0).scale(percent, true), true).add(comps.get(1).scale(percent, true), false), p);
-                //Util.drawLine(canvas, startAt, startAt.addAsNew(comps.get(0)), p);
-//            Util.drawLine(canvas,
-//                    startAt.add(comps.get(0),true),
-//                    startAt.add(comps.get(0),true).add(comps.get(1),false), p);
-//            Util.drawLine(canvas,
-//                    startAt.add(comps.get(0),true).add(comps.get(1),false),
-//                    startAt.add(comps.get(1),true), p);
-                //Util.drawLine(canvas,startAt.addAsNew(comps.get(1)),startAt,p);
-
-                //scale +=.05f;
-
+            }
+            if (valueAt!=owner.size.get()-1){
+                Util.drawLine(canvas,
+                        startAt,
+                        startAt.add(owner.vectorForDimension(at).scale(radius,true),true), p);
             }
 
         }
+
+        //float scale =.15f;
+//        for (Face f : faces.values()) {
+//            if (owner.drawFace(this, f)) {
+//                //TODO maybe faces should know how to draw themselves
+//
+//                // we need to get the compent vectors
+//                ArrayList<Vector> comps = f.getIndex().getCompnetVectors(hasVectorDims);
+//                if (comps.size() < 2) {
+//                    Log.e("brick", "comps should be size 2");
+//                }
+//
+//
+//                for (Vector v : comps) {
+//                    v.toUnit(false).scale(radius / 2f, false);
+//                }
+//
+//                Paint p = new Paint();
+//                p.setStrokeWidth(5);
+//                p.setColor(f.getColor());
+//
+//
+//                float percent = .5f;
+//                Util.drawLine(canvas,
+//                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+//                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
+//                Util.drawLine(canvas,
+//                        startAt.add(comps.get(0), true).add(comps.get(1), false),
+//                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
+//                Util.drawLine(canvas,
+//                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
+//                        startAt, p);
+//                Util.drawLine(canvas,
+//                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+//                        startAt, p);
+//
+//
+//            }
+//
+//        }
 
         picture.endRecording();
 
