@@ -47,7 +47,7 @@ public class SpinTo extends BitmapBacked {
         this.clicks =clicks;
     }
 
-    private  int getDim(Index plane,int skip){
+    public static int getDim(Index plane,int skip){
         int skipped = 0;
         for (int i =0;i<plane.size();i++){
             Integer integer = plane.get(i);
@@ -76,14 +76,9 @@ public class SpinTo extends BitmapBacked {
     public void go(){
         //spin the cube
         Log.i("spin","this:"+this);
-        if (clicks ==1) {
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
-        }else if (clicks ==2){
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
-            ((Tess)owner).rotate(startAt, dim1, dim2,!flip );
-        }else if (clicks == -1){
-            ((Tess)owner).rotate(startAt, dim1, dim2,flip );
-        }
+        ((Tess)owner).rotate(startAt,dim1,dim2,flip,clicks);
+
+
     }
 
     public float distance(Vector vector) {

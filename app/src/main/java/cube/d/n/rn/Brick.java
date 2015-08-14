@@ -286,4 +286,14 @@ public class Brick extends BitmapBacked {
         }
         return false;
     }
+
+    public boolean isCornor() {
+        Index index = getIndex();
+        for (int i =0;i< index.size();i++){
+            if (!(index.get(i).equals(new Integer(0)) || index.get(i).equals(owner.size.get()-1))){
+                return false;
+            }
+        }
+        return true;
+    }
 }
