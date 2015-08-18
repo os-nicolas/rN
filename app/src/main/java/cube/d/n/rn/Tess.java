@@ -114,6 +114,18 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
     public void onDraw(Canvas canvas) {
         // draw outline
 
+        Paint red = new Paint();
+        red.setColor(0xFFFFFF00);
+        red.setStrokeWidth(45);
+
+        // draw the path we are outlining
+        for (int i = 0; i < path.size() - 1; i++) {
+            Util.drawLine(canvas, path.get(i).getVector(), path.get(i + 1).getVector(), red);
+        }
+        if (path.size() != 0 && current != null && path.size() < 3) {
+            Util.drawLine(canvas, path.get(path.size() - 1).getVector(), current, red);
+        }
+
         outline.drawBitmap(canvas, 0, 0, new Paint());
 
         // draw animations
@@ -141,17 +153,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
 
 
-        Paint red = new Paint();
-        red.setColor(0x88ff0000);
-        red.setStrokeWidth(30);
 
-        // draw the path we are outlining
-        for (int i = 0; i < path.size() - 1; i++) {
-            Util.drawLine(canvas, path.get(i).getVector(), path.get(i + 1).getVector(), red);
-        }
-        if (path.size() != 0 && current != null && path.size() < 3) {
-            Util.drawLine(canvas, path.get(path.size() - 1).getVector(), current, red);
-        }
 
         long now = System.currentTimeMillis();
         float elapsedTime = (now - startTime) / 1000f;
@@ -242,7 +244,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                 for (int i = path.size() - 1; i > path.indexOf(closeBrick); i--) {
                     path.remove(i);
                 }
-            } else if (path.size() > 1 && legalNext(path.get(1), closeBrick)) {
+            } else if (path.size() > 1 && legalNext(path.get(path.size()-2), closeBrick)) {
                 path.set(path.size()-1, closeBrick);
             } else if (path.size() < 3 && legalNext(closeBrick)) {
                 path.add(closeBrick);

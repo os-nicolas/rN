@@ -38,9 +38,17 @@ public abstract class BitmapBacked {
         canvas.drawBitmap(myBitmap,x,y,paint);
     }
 
+
+
     protected abstract Bitmap updateBitmap() ;
 
     public void setOwner(View view) {
         owner = view;
+    }
+
+
+    public void updateBitmap(Bitmap bitmap) {
+        this.myBitmap = bitmap;
+        dirty = false;
     }
 }
