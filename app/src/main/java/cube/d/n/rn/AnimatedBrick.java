@@ -63,7 +63,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
         result.x = (float) (center.x+ fromArm.x*Math.cos(angle) + toArm.x*Math.sin(angle));
         result.y = (float) (center.y+ fromArm.y*Math.cos(angle) + toArm.y*Math.sin(angle));
 
-        drawBitmap(canvas, result.x -  brick.radius, result.y -  brick.radius, new Paint());
+        drawBitmap(canvas, result.x -  brick.myRadius(), result.y -  brick.myRadius(), new Paint());
     }
 
     private float getAnlge() {

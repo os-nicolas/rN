@@ -17,12 +17,14 @@ import java.util.HashMap;
  */
 public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
-    private HashMap<Index, Brick> bricks = new HashMap<>();
+    public HashMap<Index, Brick> bricks = new HashMap<>();
     public GS<Integer> size = new GS<>();
     public GS<Integer> dim = new GS<>();
     private Vector startAt;
-    ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
+    //ArrayList<SpinTo> spinTos = new ArrayList<SpinTo>();
     ArrayList<Animation> animations = new ArrayList<>();
+    private OutLine outline;
+    public float radius = 50;
 
     public Tess(Context context, int dim, int size) {
         super(context);
@@ -73,25 +75,28 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
         // now we need to rotate them
         for (Index myIndex : toRotate.keySet()) {
-            Brick myBrick = toRotate.get(myIndex);
-            myBrick.rotateFaces(dim1, dim2, direction);
-            Index newIndex = myIndex.rotate(dim1, dim2, direction, this);
-            bricks.put(newIndex, myBrick);
+            if (Util.hasAtleastOneEdge(this, myIndex)) {
+                Brick myBrick = toRotate.get(myIndex);
+                myBrick.rotateFaces(dim1, dim2, direction);
+                Index newIndex = myIndex.rotate(dim1, dim2, direction, this);
+                bricks.put(newIndex, myBrick);
 
-            // we also need to create animations
-            if (myBrick.hasAnimation()) {
-                myBrick.getAnimation().next = new AnimatedBrick(myIndex, dim1, dim2, direction, myBrick);
-            } else {
-                animations.add(new AnimatedBrick(myIndex, dim1, dim2, direction, myBrick));
+                // we also need to create animations
+                if (myBrick.hasAnimation()) {
+                    myBrick.getAnimation().next = new AnimatedBrick(myIndex, dim1, dim2, direction, myBrick);
+                } else {
+                    animations.add(new AnimatedBrick(myIndex, dim1, dim2, direction, myBrick));
+                }
             }
-
         }
     }
 
 
     public void initCube(Index at) {
         if (at.size() == dim.get()) {
-            new Brick(new Index(at), this);
+            if (Util.hasAtleastOneEdge(this,at)) {
+                new Brick(new Index(at), this);
+            }
         } else {
             for (int i = 0; i < size.get(); i++) {
                 Index temp = new Index(at);
@@ -107,6 +112,9 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
     @Override
     public void onDraw(Canvas canvas) {
+        // draw outline
+
+        outline.drawBitmap(canvas, 0, 0, new Paint());
 
         // draw animations
         for (int i = animations.size() - 1; i >= 0; i--) {
@@ -125,36 +133,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
         // draw bricks
         for (Brick b : bricks.values()) {
-            if (active.get() == null || b.sharesFace(active.get())) {
+            //if (active.get() == null || b.sharesFace(active.get())) {
                 b.draw(canvas, 0xff);
-            }
+            //}
         }
 
-        // draw spin tos
-        for (SpinTo st : spinTos) {
-            st.draw(canvas);
-        }
 
-        // draw outline
-        Paint grey = new Paint();
-        grey.setColor(0x88ffffff);
-        grey.setStrokeWidth(20);
-        Paint black = new Paint();
-        black.setColor(0xff000000);
-        black.setStrokeWidth(5);
 
-        for (Brick b : bricks.values()) {
-            Index index = b.getIndex();
-            for (int at = 0; at < index.size(); at++) {
-                if (index.get(at) == 0) {
-                    // when the index is zero draw a line from b to
-                    // to a copy of b where at have an index of size
-                    Index indexTo = new Index(index);
-                    indexTo.set(at, size.get() - 1);
-                    Util.drawLine(canvas, index.getVector(this), indexTo.getVector(this), grey);
-                }
-            }
-        }
 
         Paint red = new Paint();
         red.setColor(0x88ff0000);
@@ -209,9 +194,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
         // scale the vectors to fit in the screen
         float xSum = 1;
+        float leftSum = .5f;
         float ySum = 1;
         for (Vector v : dimensionVectors.values()) {
             xSum += Math.abs(v.x) * (size.get() - 1);
+            if (v.x <0){
+                leftSum += Math.abs(v.x) * (size.get() - 1);
+            }
             ySum += Math.abs(v.y) * (size.get() - 1);
         }
         //float buffer = 30;//TODO scale by dpi
@@ -224,7 +213,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         }
 
         // find out start point
-        startAt = new Vector((width - xSum * scale) / 2f, (height - ySum * scale) / 2f);
+        startAt = new Vector((leftSum*scale), (height - ySum * scale) / 2f);
+
+
+        outline = new OutLine(this,Math.max(width/2,height/2));
     }
 
     public void addBrick(Index i, Brick brick) {
@@ -250,8 +242,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
                 for (int i = path.size() - 1; i > path.indexOf(closeBrick); i--) {
                     path.remove(i);
                 }
-            } else if (path.size() == 3 && legalNext(path.get(1), closeBrick)) {
-                path.set(2, closeBrick);
+            } else if (path.size() > 1 && legalNext(path.get(1), closeBrick)) {
+                path.set(path.size()-1, closeBrick);
             } else if (path.size() < 3 && legalNext(closeBrick)) {
                 path.add(closeBrick);
             }
@@ -371,9 +363,20 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             return true;
         } else {
             int same = 0;
+            Index cbi = closeBrick.getIndex();
+            Index ebi = pathEnd.getIndex();
             for (int at = 0; at < closeBrick.getIndex().size(); at++) {
                 if (closeBrick.getIndex().get(at).equals(pathEnd.getIndex().get(at))) {
                     same++;
+                }else {
+                    // if they are not the same it better be and edge
+                    if (cbi.get(at) != 0  && cbi.get(at) != size.get()-1){
+                        return false;
+                    }
+                    // and the way we are comming from better also be an edge
+                    if (ebi.get(at) != 0  && ebi.get(at) != size.get()-1){
+                        return false;
+                    }
                 }
             }
 
@@ -387,7 +390,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         Vector eventAt = new Vector(event);
         dead = false;
         for (Brick b : bricks.values()) {
-            if (b.isCornor()) {
+            if (Util.isEdge(this, b)) {
                 if (b.in(eventAt)) {
                     float myDistance = b.distance(eventAt);
                     if (myDistance < minDis) {
@@ -401,31 +404,31 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         return closest;
     }
 
-    SuperPrvate<Brick> active = new SuperPrvate<Brick>() {
-        @Override
-        public void set(Brick newActive) {
-            if (value != null) {
-                value.myInvalidate();
-            }
-            if (newActive != null) {
-                newActive.myInvalidate();
-            }
-            value = newActive;
-            if (value != null) {
-                spinTos = value.getSpinTos();
-            } else {
-                spinTos = new ArrayList<>();
-            }
-            for (Brick b : bricks.values()) {
-                b.myInvalidate();
-            }
-        }
-
-        @Override
-        public Brick get() {
-            return value;
-        }
-    };
+//    SuperPrvate<Brick> active = new SuperPrvate<Brick>() {
+//        @Override
+//        public void set(Brick newActive) {
+//            if (value != null) {
+//                value.myInvalidate();
+//            }
+//            if (newActive != null) {
+//                newActive.myInvalidate();
+//            }
+//            value = newActive;
+//            if (value != null) {
+//                spinTos = value.getSpinTos();
+//            } else {
+//                spinTos = new ArrayList<>();
+//            }
+//            for (Brick b : bricks.values()) {
+//                b.myInvalidate();
+//            }
+//        }
+//
+//        @Override
+//        public Brick get() {
+//            return value;
+//        }
+//    };
 
     public Vector getStartAt() {
         return new Vector(startAt);

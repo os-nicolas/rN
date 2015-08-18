@@ -17,7 +17,6 @@ import java.util.Random;
  */
 public class Brick extends BitmapBacked {
     final public Tess owner;
-    final float radius = 50f;
     final int dbColor;
     final Index startIndex;
 
@@ -81,9 +80,9 @@ public class Brick extends BitmapBacked {
         }
     }
 
-    public boolean isActive() {
-        return this.equals(owner.active.get());
-    }
+//    public boolean isActive() {
+//        return this.equals(owner.active.get());
+//    }
 
     public String toString() {
         Index myIndex = getIndex();
@@ -104,7 +103,7 @@ public class Brick extends BitmapBacked {
             Vector startAt = getIndex().getVector(owner);
             Paint p = new Paint();
             p.setAlpha(alpha);
-            drawBitmap(canvas, startAt.x - radius, startAt.y - radius, p);
+            drawBitmap(canvas, startAt.x - myRadius(), startAt.y - myRadius(), p);
         }
     }
 
@@ -169,7 +168,7 @@ public class Brick extends BitmapBacked {
     }
 
     public boolean in(Vector vector) {
-        return distance(vector) < radius;
+        return distance(vector) < myRadius();
     }
 
     public float distance(Vector vector) {
@@ -195,35 +194,50 @@ public class Brick extends BitmapBacked {
         return getIndex().getVector(owner);
     }
 
+
+    public float myRadius(){
+        return owner.radius*1.5f;
+    }
+
     public Bitmap getBitmap() {
         Picture picture = new Picture();
-        Canvas canvas = picture.beginRecording((int) (2 * radius), (int) (2 * radius));
+        Canvas canvas = picture.beginRecording((int) (2 *myRadius()), (int) (2 * myRadius()));
 
-        Vector startAt = new Vector(radius, radius);
+        Vector startAt = new Vector(myRadius(), myRadius());
 
         Paint grey = new Paint();
         grey.setColor(dbColor);
         //canvas.drawCircle(startAt.x,startAt.y,(isActive()?radius:radius/2f),grey);
 
         Paint p = new Paint();
-        p.setStrokeWidth(5);
-        p.setColor(Color.BLACK);
+        p.setStrokeWidth(20);
+        p.setColor(getColor());
+
+        Util.drawCircle(canvas, startAt, 20, p);
+
+        //Util.drawCircle(canvas,startAt,owner.radius,p);
 
         for (int at=0;at<startIndex.size();at++){
             int valueAt = startIndex.get(at);
-            if (valueAt !=0){
-                // we draw a line down from the center
-                Util.drawLine(canvas,
-                        startAt,
-                        startAt.add(owner.vectorForDimension(at).scale(-radius, true), true), p);
+            int endWidth =  (Util.pointsAtAnyThing(owner, startIndex, at)?10:0);
+                if (valueAt != 0) {
+                    // we draw a line down from the center
+                    Util.drawLine(canvas,
+                            startAt,
+                            startAt.add(owner.vectorForDimension(at).toUnit(true).scale(-owner.radius, false), true),
+                            getColor(),
+                            20,
+                            endWidth);
 
-            }
-            if (valueAt!=owner.size.get()-1){
-                Util.drawLine(canvas,
-                        startAt,
-                        startAt.add(owner.vectorForDimension(at).scale(radius,true),true), p);
-            }
-
+                }
+                if (valueAt != owner.size.get() - 1) {
+                    Util.drawLine(canvas,
+                            startAt,
+                            startAt.add(owner.vectorForDimension(at).toUnit(true).scale(owner.radius, false), true),
+                            getColor(),
+                            20,
+                            endWidth);
+                }
         }
 
         //float scale =.15f;
@@ -269,6 +283,12 @@ public class Brick extends BitmapBacked {
         picture.endRecording();
 
         return Util.pictureDrawable2Bitmap(picture);
+    }
+
+    private int getColor() {
+        Vector myLoc = startIndex.getVector(owner);
+
+        return Util.getColor(owner,myLoc);
     }
 
     public boolean sharesFace(Brick brick) {
