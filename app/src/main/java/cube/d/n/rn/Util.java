@@ -78,8 +78,8 @@ public class Util {
         float hieght = owner.getHeight();
 
         return  (0x01000000*alpha) +
-                ((int)(0xff*(myLoc.x/width))*0x100) +
-                ((int)(0xff*(myLoc.y/hieght))*0x1);
+                ((int)(0xff*(myLoc.x/width))*0x10000) +
+                ((int)(0xff*(myLoc.y/hieght))*0x100);
     }
 
     public static int getColor(View owner, Vector vector) {

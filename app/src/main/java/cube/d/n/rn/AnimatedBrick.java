@@ -24,13 +24,13 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
         this.dim2 = dim2;
         this.direction = direction;
         this.brick = brick;
-        this.updateBitmap(brick.getBitmap());
+        //this.updateBitmap(brick.getBitmap());
     }
 
 
     @Override
     public Bitmap updateBitmap(){
-        return brick.getBitmap();
+        return brick.getBitmap(this);
     }
 
     public void draw(Canvas canvas) {

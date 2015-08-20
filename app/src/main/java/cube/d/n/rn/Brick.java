@@ -95,7 +95,7 @@ public class Brick extends BitmapBacked {
 
     @Override
     public Bitmap updateBitmap() {
-        return getBitmap();
+        return getBitmap(owner);
     }
 
     public void draw(Canvas canvas, int alpha) {
@@ -168,7 +168,7 @@ public class Brick extends BitmapBacked {
     }
 
     public boolean in(Vector vector) {
-        return distance(vector) < myRadius();
+        return distance(vector) < 2*myRadius();
     }
 
     public float distance(Vector vector) {
@@ -199,7 +199,7 @@ public class Brick extends BitmapBacked {
         return owner.radius*1.5f;
     }
 
-    public Bitmap getBitmap() {
+    public Bitmap getBitmap(HasVectorDims hasVectorDims) {
         Picture picture = new Picture();
         Canvas canvas = picture.beginRecording((int) (2 *myRadius()), (int) (2 * myRadius()));
 
@@ -240,7 +240,7 @@ public class Brick extends BitmapBacked {
                 }
         }
 
-        //float scale =.15f;
+//        //float scale =.15f;
 //        for (Face f : faces.values()) {
 //            if (owner.drawFace(this, f)) {
 //                //TODO maybe faces should know how to draw themselves
@@ -253,7 +253,7 @@ public class Brick extends BitmapBacked {
 //
 //
 //                for (Vector v : comps) {
-//                    v.toUnit(false).scale(radius / 2f, false);
+//                    v.toUnit(false).scale(owner.radius / 2f, false);
 //                }
 //
 //                Paint p = new Paint();
@@ -262,17 +262,24 @@ public class Brick extends BitmapBacked {
 //
 //
 //                float percent = .5f;
+////                Util.drawLine(canvas,
+////                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+////                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
+////                Util.drawLine(canvas,
+////                        startAt.add(comps.get(0), true).add(comps.get(1), false),
+////                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
+////                Util.drawLine(canvas,
+////                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
+////                        startAt, p);
+////                Util.drawLine(canvas,
+////                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+////                        startAt, p);
+//
 //                Util.drawLine(canvas,
-//                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
-//                        startAt.add(comps.get(0), true).add(comps.get(1), false), p);
-//                Util.drawLine(canvas,
-//                        startAt.add(comps.get(0), true).add(comps.get(1), false),
-//                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false), p);
-//                Util.drawLine(canvas,
-//                        startAt.add(comps.get(1), true).add(comps.get(0).scale(percent, true), false),
+//                        startAt.add(comps.get(1), true),
 //                        startAt, p);
 //                Util.drawLine(canvas,
-//                        startAt.add(comps.get(0), true).add(comps.get(1).scale(percent, true), false),
+//                        startAt.add(comps.get(0), true),
 //                        startAt, p);
 //
 //

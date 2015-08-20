@@ -3,6 +3,7 @@ package cube.d.n.rn;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public abstract class BitmapBacked {
         if (dirty){
             // we set dirty to false first so animating objects can set it to true again in updateBitmap
             dirty= false;
+            Log.d("I was dirty","updating");
             myBitmap = updateBitmap();
 
         }
@@ -48,7 +50,7 @@ public abstract class BitmapBacked {
 
 
     public void updateBitmap(Bitmap bitmap) {
-        this.myBitmap = bitmap;
+        this.myBitmap = Bitmap.createBitmap(bitmap);
         dirty = false;
     }
 }
