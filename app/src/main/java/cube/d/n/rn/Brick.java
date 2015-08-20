@@ -29,7 +29,7 @@ public class Brick extends BitmapBacked {
         this.owner = owner;
         owner.addBrick(i, this);
         startIndex = new Index(i);
-        initFaces(new Index());
+        initFaces(new Index(owner.size.get()));
 
         Random r = new Random();
         dbColor = r.nextInt(0xffffff) + 0x88000000;

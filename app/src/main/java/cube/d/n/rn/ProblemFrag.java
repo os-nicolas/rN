@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 
 /**
  * Created by Colin on 8/19/2015.
@@ -36,10 +36,41 @@ public class ProblemFrag extends Fragment{
 
         View rootView = inflater.inflate(
                 R.layout.cube_frame, container, false);
-        Tess t = (Tess)rootView.findViewById(R.id.cube);
-        t.init(args.getInt("DIM"),args.getInt("SIZE"));
+        final Tess t = (Tess)rootView.findViewById(R.id.cube);
+        t.init(args.getInt("DIM"), args.getInt("SIZE"));
+        final String resetTo = t.getCubeString();
+
+        final MyViewPager mvp = ((MyViewPager)((MainActivity)getActivity()).findViewById(R.id.pager));
 
 
+        ((Button) rootView.findViewById(R.id.left)).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (mvp.getCurrentItem()!=0){
+                mvp.setCurrentItem(mvp.getCurrentItem() - 1, true);
+                }
+            }
+        });
+
+        ((Button)rootView.findViewById(R.id.right)).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (mvp.getCurrentItem()< mvp.getChildCount()){
+                    mvp.setCurrentItem(mvp.getCurrentItem()+1, true);
+                }
+            }
+        });
+
+        rootView.findViewById(R.id.reset).setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Log.i("resetting from",t.getCubeString());
+                t.resetTo(resetTo);
+            }
+        });
 
         return rootView;
     }

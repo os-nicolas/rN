@@ -28,16 +28,28 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
 
     public Tess(Context context, int dim, int size) {
         super(context);
-        if (dim > RN.rn().getMaxSize()) {
-            Log.w("Tess", "dim exceeds max dimension");
-        }
+
         init(dim, size);
+        Log.d("cubeString", getCubeString());
     }
 
     public void init(int dim, int size) {
+        pInit(dim, size);
+
+        initCube(new Index(this.size.get()));
+    }
+
+    public void init(int dim, int size,String cubeRep) {
+        pInit(dim, size);
+
+        initCube(cubeRep);
+    }
+
+
+
+    private void pInit(int dim, int size) {
         this.dim.set(dim);
         this.size.set(size);
-        initCube(new Index());
 
         final Tess that = this;
         this.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -91,6 +103,20 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         }
     }
 
+    public String getCubeString(){
+        String res = "";
+        for (int at=0;at<Math.pow(size.get(), dim.get());at++){
+            Log.d("we are at: ",""+at);
+            Index tempIndex = new Index(size.get(),at,dim.get());
+            if (Util.hasAtleastOneEdge(this,tempIndex)) {
+                res += bricks.get(tempIndex).startIndex.pos() + ",";
+            }else{
+                res+="-,";
+            }
+        }
+        return res;
+    }
+
 
     public void initCube(Index at) {
         if (at.size() == dim.get()) {
@@ -104,7 +130,21 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
                 initCube(temp);
             }
         }
+    }
 
+    public  void resetTo(String cubeRep){
+        bricks = new HashMap<>();
+        initCube(cubeRep);
+    }
+
+    private void initCube(String cubeRep) {
+//        new Index(5,3);
+        String[] split = cubeRep.split(",");
+        for(String s:split){
+            if (s.equals("-")){}else{
+                new Brick(new Index(size.get(),Integer.parseInt(s),dim.get()),this);
+            }
+        }
     }
 
     long startTime = System.currentTimeMillis();

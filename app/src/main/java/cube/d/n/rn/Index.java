@@ -8,15 +8,39 @@ import javax.xml.transform.Result;
  * Created by Colin_000 on 4/17/2015.
  */
 public class Index extends ArrayList<Integer> {
+
+    int maxSize;
+
     public Index(Index index){
-        super();
+        this(index.maxSize);
         for (Integer i:index){
             add(new Integer(i));
         }
     }
 
-    public Index(){
+    public Index(int maxSize){
         super();
+        this.maxSize=maxSize;
+    }
+
+    public Index(int maxSize, int pos,int dim) {
+        this(maxSize);
+        for (int at = dim-1;at>=0;at--){
+            if (pos / Math.pow(maxSize,at) >= 1){
+                add((int)Math.floor(pos / Math.pow(maxSize, at)));
+                pos -= Math.floor(pos / Math.pow(maxSize,at))*Math.pow(maxSize, at);
+            }else{
+                add(0);
+            }
+        }
+    }
+
+    public int pos() {
+        int pos = 0;
+        for (int i = 0; i < size(); i++) {
+            pos += (int)Math.pow(maxSize,((size()-1)-i)) * get(i);
+        }
+        return pos;
     }
 
     public Vector getVector(HasVectorDims tess) {
@@ -45,11 +69,7 @@ public class Index extends ArrayList<Integer> {
 
     @Override
     public int hashCode() {
-        int hashCode = 0;
-        for (int i = 0; i < size(); i++) {
-            hashCode += (int)Math.pow(RN.rn().getMaxSize(),i) * get(i);
-        }
-        return hashCode;
+        return pos();
     }
 
     @Override

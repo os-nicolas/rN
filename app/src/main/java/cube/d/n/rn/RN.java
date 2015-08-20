@@ -11,9 +11,9 @@ public class RN extends Application {
     public static RN rn(){
         return instance;
     }
-    public int getMaxSize(){
-        return 5;
-    }
+//    public int getMaxSize(){
+//        return 5;
+//    }
 
     /**
      * @return milliseconds

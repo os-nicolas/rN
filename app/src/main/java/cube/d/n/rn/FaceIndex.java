@@ -48,7 +48,7 @@ public class FaceIndex extends ArrayList<FaceIndex.FaceValue> {
     public int hashCode() {
         int hashCode = 0;
         for (int i = 0; i < size(); i++) {
-            hashCode += (int)Math.pow(RN.rn().getMaxSize(),i) * (toInt(get(i)));
+            hashCode += (int)Math.pow(FaceValue.values().length,i) * (toInt(get(i)));
         }
         return hashCode;
     }

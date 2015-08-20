@@ -128,6 +128,10 @@ public class Util {
     public static boolean isEdge(Tess tess,Brick b) {
 
         Index index = b.getIndex();
+        return isEdge(tess, index);
+    }
+
+    public static boolean isEdge(Tess tess, Index index) {
         int count = 0;
         for (int i=0;i<index.size();i++){
                 if (index.get(i) == 0 || index.get(i) == tess.size.get() - 1) {

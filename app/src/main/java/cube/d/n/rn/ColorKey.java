@@ -22,7 +22,7 @@ public class ColorKey {
 
     @Override
     public int hashCode(){
-        return atIndex.hashCode()*(int)Math.pow(RN.rn().getMaxSize(),faceIndex.size()) + binaryHash(faceIndex);
+        return atIndex.hashCode()*(int)Math.pow(faceIndex.maxSize,faceIndex.size()) + binaryHash(faceIndex);
     }
 
     private int binaryHash(Index faceIndex) {
