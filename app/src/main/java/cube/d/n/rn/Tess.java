@@ -15,7 +15,7 @@ import java.util.HashMap;
 /**
  * Created by Colin_000 on 4/17/2015.
  */
-public class Tess extends View implements View.OnTouchListener, HasVectorDims {
+public class Tess extends View implements View.OnTouchListener, HasVectorDims, NoScroll {
 
     public HashMap<Index, Brick> bricks = new HashMap<>();
     public GS<Integer> size = new GS<>();
@@ -34,7 +34,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         init(dim, size);
     }
 
-    private void init(int dim, int size) {
+    public void init(int dim, int size) {
         this.dim.set(dim);
         this.size.set(size);
         initCube(new Index());
@@ -55,7 +55,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
 
     public Tess(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(3, 3);
+        //init(3, 3);
     }
 
     public void rotate(Index startAt, int dim1, int dim2, boolean direction) {
@@ -150,11 +150,6 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
             //}
         }
 
-
-
-
-
-
         long now = System.currentTimeMillis();
         float elapsedTime = (now - startTime) / 1000f;
         frames++;
@@ -189,7 +184,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims {
         for (float i = 0; i < dim.get(); i++) {
             double angle = Math.PI * (i + .5) / (dim.get()) - Math.PI / 2f;
             Vector v = new Vector((float) Math.sin(angle)*d, (float) Math.cos(angle)*d);
-            d*=1.5f;
+            d*=(float)size.get();
             Log.i("adding vector:", v + "");
             dimensionVectors.put((int) i, v);
         }
