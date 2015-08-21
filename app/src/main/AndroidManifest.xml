@@ -3,6 +3,8 @@
     package="cube.d.n.rn" >
 
     <application
+
+        android:name=".RN"
         android:allowBackup="true"
         android:largeHeap="true"
         android:icon="@drawable/ic_launcher"

@@ -40,6 +40,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     }
 
     public void init(int dim, int size,String cubeRep) {
+        Log.d("init","dim: "+ dim+ " size: " + size + " cubeRep: "+ cubeRep);
         pInit(dim, size);
 
         initCube(cubeRep);
@@ -106,7 +107,6 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     public String getCubeString(){
         String res = "";
         for (int at=0;at<Math.pow(size.get(), dim.get());at++){
-            Log.d("we are at: ",""+at);
             Index tempIndex = new Index(size.get(),at,dim.get());
             if (Util.hasAtleastOneEdge(this,tempIndex)) {
                 res += bricks.get(tempIndex).startIndex.pos() + ",";
@@ -140,11 +140,22 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     private void initCube(String cubeRep) {
 //        new Index(5,3);
         String[] split = cubeRep.split(",");
+        int at =0;
         for(String s:split){
             if (s.equals("-")){}else{
-                new Brick(new Index(size.get(),Integer.parseInt(s),dim.get()),this);
+                new Brick(new Index(size.get(),at,dim.get()),new Index(size.get(),Integer.parseInt(s),dim.get()),this);
+            }
+            at++;
+        }
+    }
+
+    public boolean isCurrentlySolved(){
+        for(Brick b: bricks.values()){
+            if (!b.startIndex.equals(b.getIndex())){
+                return false;
             }
         }
+        return true;
     }
 
     long startTime = System.currentTimeMillis();

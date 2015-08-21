@@ -14,13 +14,27 @@ import android.widget.Button;
 public class ProblemFrag extends Fragment{
 
 
-    public static Fragment make(int dim, int size) {
+//    public static Fragment make(int dim, int size) {
+//        ProblemFrag result = new ProblemFrag();
+//        Bundle args = new Bundle();
+//        args.putInt("DIM",dim);
+//        args.putInt("SIZE",size);
+//        result.setArguments(args);
+//        return result;
+//    }
+
+    public static Fragment make(Problem problem) {
         ProblemFrag result = new ProblemFrag();
         Bundle args = new Bundle();
-        args.putInt("DIM",dim);
-        args.putInt("SIZE",size);
+        args.putInt("ID",problem.myId);
         result.setArguments(args);
         return result;
+    }
+
+    public Problem getProblem(){
+        Bundle args = getArguments();
+        int id = args.getInt("ID");
+        return Problem.getProblem(id);
     }
 
     @Override
@@ -32,12 +46,12 @@ public class ProblemFrag extends Fragment{
         // The last two arguments ensure LayoutParams are inflated
         // properly.
 
-        Bundle args = getArguments();
-
         View rootView = inflater.inflate(
                 R.layout.cube_frame, container, false);
         final Tess t = (Tess)rootView.findViewById(R.id.cube);
-        t.init(args.getInt("DIM"), args.getInt("SIZE"));
+        final Problem problem = getProblem();
+
+        t.init(problem.dim, problem.size,problem.startState);
         final String resetTo = t.getCubeString();
 
         final MyViewPager mvp = ((MyViewPager)((MainActivity)getActivity()).findViewById(R.id.pager));
@@ -47,8 +61,8 @@ public class ProblemFrag extends Fragment{
 
             @Override
             public void onClick(View v) {
-                if (mvp.getCurrentItem()!=0){
-                mvp.setCurrentItem(mvp.getCurrentItem() - 1, true);
+                if (mvp.getCurrentItem() != 0) {
+                    mvp.setCurrentItem(mvp.getCurrentItem() - 1, true);
                 }
             }
         });
@@ -57,8 +71,8 @@ public class ProblemFrag extends Fragment{
 
             @Override
             public void onClick(View v) {
-                if (mvp.getCurrentItem()< mvp.getChildCount()){
-                    mvp.setCurrentItem(mvp.getCurrentItem()+1, true);
+                if (mvp.getCurrentItem() < mvp.getChildCount()) {
+                    mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
                 }
             }
         });
@@ -67,11 +81,13 @@ public class ProblemFrag extends Fragment{
 
             @Override
             public void onClick(View v) {
-                Log.i("resetting from",t.getCubeString());
+                Log.i("resetting from", t.getCubeString());
                 t.resetTo(resetTo);
             }
         });
 
         return rootView;
     }
+
+
 }

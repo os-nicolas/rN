@@ -16,12 +16,19 @@ public class MainAdapter extends FragmentPagerAdapter {
 
     public MainAdapter(FragmentManager fm) {
         super(fm);
-        frags.add(ProblemFrag.make(2, 2));
-        frags.add(ProblemFrag.make(3, 2));
-        frags.add(ProblemFrag.make(3,3));
-        frags.add(ProblemFrag.make(4, 2));
-        frags.add(ProblemFrag.make(3,4));
-        frags.add(ProblemFrag.make(4, 3));
+
+
+
+        for (Problem problem: RN.rn().problems){
+            frags.add(ProblemFrag.make(problem));
+        }
+//
+//        frags.add(ProblemFrag.make(2, 2));
+//        frags.add(ProblemFrag.make(3, 2));
+//        frags.add(ProblemFrag.make(3,3));
+//        frags.add(ProblemFrag.make(4, 2));
+//        frags.add(ProblemFrag.make(3, 4));
+//        frags.add(ProblemFrag.make(4, 3));
     }
 
     @Override

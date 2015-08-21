@@ -23,16 +23,19 @@ public class Brick extends BitmapBacked {
     // bricks have a color for every pair of dimensions
     HashMap<Index, Face> faces = new HashMap<>();
 
-
-    public Brick(Index i, Tess owner) {
+    public Brick(Index currentIndex,Index startIndex, Tess owner) {
         super(owner);
         this.owner = owner;
-        owner.addBrick(i, this);
-        startIndex = new Index(i);
+        owner.addBrick(currentIndex, this);
+        this.startIndex = new Index(startIndex);
         initFaces(new Index(owner.size.get()));
 
         Random r = new Random();
         dbColor = r.nextInt(0xffffff) + 0x88000000;
+    }
+
+    public Brick(Index i, Tess owner) {
+        this(i,i,owner);
     }
 
     private void initFaces(Index at) {
