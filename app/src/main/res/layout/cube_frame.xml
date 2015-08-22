@@ -3,14 +3,37 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <cube.d.n.rn.BotBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
     <cube.d.n.rn.Tess
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:id="@+id/cube"/>
 
-    <cube.d.n.rn.BotBar
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+    <FrameLayout
+        android:padding="15dp"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="UNSOLVED"
+            android:id="@+id/problem_status" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="18"
+            android:id="@+id/problem_number"
+            android:gravity="right" />
+    </FrameLayout>
 
 </LinearLayout>

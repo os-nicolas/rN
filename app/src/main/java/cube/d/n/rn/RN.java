@@ -75,4 +75,8 @@ public class RN extends Application {
 
         return problemRows;
     }
+
+    public int maxUnlocked() {
+        return 0;
+    }
 }

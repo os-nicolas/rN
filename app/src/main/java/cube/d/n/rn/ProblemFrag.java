@@ -7,6 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by Colin on 8/19/2015.
@@ -46,10 +49,11 @@ public class ProblemFrag extends Fragment{
         // The last two arguments ensure LayoutParams are inflated
         // properly.
 
-        View rootView = inflater.inflate(
+        final View rootView = inflater.inflate(
                 R.layout.cube_frame, container, false);
         final Tess t = (Tess)rootView.findViewById(R.id.cube);
         final Problem problem = getProblem();
+        t.setProblem(problem);
 
         t.init(problem.dim, problem.size,problem.startState);
         final String resetTo = t.getCubeString();
@@ -58,7 +62,6 @@ public class ProblemFrag extends Fragment{
 
 
         ((Button) rootView.findViewById(R.id.left)).setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 if (mvp.getCurrentItem() != 0) {
@@ -71,7 +74,7 @@ public class ProblemFrag extends Fragment{
 
             @Override
             public void onClick(View v) {
-                if (mvp.getCurrentItem() < mvp.getChildCount()) {
+                if (mvp.getCurrentItem() < RN.rn().maxUnlocked()) {
                     mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
                 }
             }
@@ -85,6 +88,57 @@ public class ProblemFrag extends Fragment{
                 t.resetTo(resetTo);
             }
         });
+
+        ((TextView)rootView.findViewById(R.id.problem_number)).setText("" + (problem.myId));
+
+        ((TextView)rootView.findViewById(R.id.problem_status)).setText(problem.getSolved() ? "SOLVED" : "");
+
+        final ProblemFrag that = this;
+
+        if (!problem.getSolved()){
+            problem.onSolved(new Runnable(){
+                @Override
+                public void run() {
+                    Thread th = new Thread(new Runnable(){
+                        @Override
+                        public void run() {
+                            String solved ="SOLVED";
+                            String current = "";
+                            for (int i=0;i<solved.length();i++){
+                                try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                current+=solved.charAt(i);
+                                final String c = current;
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ((TextView) rootView.findViewById(R.id.problem_status)).setText(c);
+                                    }
+                                });
+                            }
+                            try {
+                                Thread.sleep(400);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
+                                }
+                            });
+
+                        }
+                    });
+                    th.start();
+
+
+                }
+            });
+        }
 
         return rootView;
     }
