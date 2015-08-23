@@ -41,9 +41,31 @@ public class Problem {
     }
 
     public void setSolved(boolean solved){
+        if (!getSolved() && solved){
+            for(Runnable r: runOnSolved){
+                r.run();
+            }
+
+        }
+
         SharedPreferences settings = RN.rn().getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(myId+"", solved);
         editor.commit();
+    }
+
+    ArrayList<Runnable> runOnSolved = new ArrayList<>();
+    public void onSolved(Runnable runnable) {
+        runOnSolved.add(runnable);
+    }
+
+    public boolean unlocked() {
+        if (myId == 0){
+            return true;
+        }else{
+            Problem before = getProblem(myId-1);
+            return before.getSolved();
+        }
+
     }
 }

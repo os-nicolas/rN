@@ -14,7 +14,7 @@ public class AnimatedBrick extends BitmapBacked implements HasVectorDims, Animat
     private final boolean direction;
     public final Brick brick;
     private long startAt=-1;
-    private final long runTime =1000;
+    public static final long runTime =800;
     public AnimatedBrick next=null;
 
     public AnimatedBrick(Index from, int dim1,int dim2, boolean direction ,Brick brick){

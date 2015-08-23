@@ -1,8 +1,9 @@
 package cube.d.n.rn;
 
-import android.app.ActionBar;
+
 import android.app.Activity;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,28 +27,29 @@ public class MainActivity extends ActionBarActivity {
         if (mViewPager.getAdapter() == null) {
             MainAdapter adapter =
                     new MainAdapter(
-                            getSupportFragmentManager());
+                            getSupportFragmentManager(),this);
             mViewPager.setAdapter(adapter);
 
         }
+        mViewPager.setCurrentItem(RN.rn().unsolvedIndex(), true);
 
 
     }
 
+    @Override
     public void onResume() {
         super.onResume();
         View decorView = getWindow().getDecorView();
-        // Hide the status bar.
+// Hide the status bar.
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        Log.d("tut act", "totally hid the action bar");
         decorView.setSystemUiVisibility(uiOptions);
-//        // Remember that you should never show the action bar if the
-//        // status bar is hidden, so hide that too if necessary.
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
+// Remember that you should never show the action bar if the
+// status bar is hidden, so hide that too if necessary.
+        ActionBar actionBar = getSupportActionBar();
+        //ActionBar();
+        if (actionBar!= null) {
             actionBar.hide();
         }
-
     }
 
 

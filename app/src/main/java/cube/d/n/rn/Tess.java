@@ -25,6 +25,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     ArrayList<Animation> animations = new ArrayList<>();
     private OutLine outline;
     public float radius = 50;
+    private Problem problem;
 
     public Tess(Context context, int dim, int size) {
         super(context);
@@ -33,22 +34,33 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         Log.d("cubeString", getCubeString());
     }
 
-    public void init(int dim, int size) {
+    public void init(final int dim, final int size) {
+        final Tess that = this;
+
+
         pInit(dim, size);
 
-        initCube(new Index(this.size.get()));
+        initCube(new Index(that.size.get()));
+
     }
 
-    public void init(int dim, int size,String cubeRep) {
-        Log.d("init","dim: "+ dim+ " size: " + size + " cubeRep: "+ cubeRep);
+    public void init(final int dim, final int size, final String cubeRep) {
+
+
         pInit(dim, size);
 
         initCube(cubeRep);
+
+        //Log.d("init", "dim: " + dim + " size: " + size + " cubeRep: " + cubeRep);
+
     }
 
-
+    public void setProblem(Problem problem) {
+        this.problem = problem;
+    }
 
     private void pInit(int dim, int size) {
+        animations = new ArrayList<>();
         this.dim.set(dim);
         this.size.set(size);
 
@@ -102,16 +114,32 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
                 }
             }
         }
+        if (problem != null && !problem.getSolved()) {//
+            if (isCurrentlySolved()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(AnimatedBrick.runTime);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        problem.setSolved(true);
+                    }
+                }).start();
+            }
+        }
     }
 
-    public String getCubeString(){
+    public String getCubeString() {
         String res = "";
-        for (int at=0;at<Math.pow(size.get(), dim.get());at++){
-            Index tempIndex = new Index(size.get(),at,dim.get());
-            if (Util.hasAtleastOneEdge(this,tempIndex)) {
+        for (int at = 0; at < Math.pow(size.get(), dim.get()); at++) {
+            Index tempIndex = new Index(size.get(), at, dim.get());
+            if (Util.hasAtleastOneEdge(this, tempIndex)) {
                 res += bricks.get(tempIndex).startIndex.pos() + ",";
-            }else{
-                res+="-,";
+            } else {
+                res += "-,";
             }
         }
         return res;
@@ -120,7 +148,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
 
     public void initCube(Index at) {
         if (at.size() == dim.get()) {
-            if (Util.hasAtleastOneEdge(this,at)) {
+            if (Util.hasAtleastOneEdge(this, at)) {
                 new Brick(new Index(at), this);
             }
         } else {
@@ -132,26 +160,28 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         }
     }
 
-    public  void resetTo(String cubeRep){
+    public synchronized void resetTo(String cubeRep) {
         bricks = new HashMap<>();
+        animations = new ArrayList<>();
         initCube(cubeRep);
     }
 
     private void initCube(String cubeRep) {
 //        new Index(5,3);
         String[] split = cubeRep.split(",");
-        int at =0;
-        for(String s:split){
-            if (s.equals("-")){}else{
-                new Brick(new Index(size.get(),at,dim.get()),new Index(size.get(),Integer.parseInt(s),dim.get()),this);
+        int at = 0;
+        for (String s : split) {
+            if (s.equals("-")) {
+            } else {
+                new Brick(new Index(size.get(), at, dim.get()), new Index(size.get(), Integer.parseInt(s), dim.get()), this);
             }
             at++;
         }
     }
 
-    public boolean isCurrentlySolved(){
-        for(Brick b: bricks.values()){
-            if (!b.startIndex.equals(b.getIndex())){
+    public boolean isCurrentlySolved() {
+        for (Brick b : bricks.values()) {
+            if (!b.startIndex.equals(b.getIndex())) {
                 return false;
             }
         }
@@ -162,7 +192,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     int frames = 1;
 
     @Override
-    public void onDraw(Canvas canvas) {
+    public synchronized void onDraw(Canvas canvas) {
         // draw outline
 
         Paint red = new Paint();
@@ -197,7 +227,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         // draw bricks
         for (Brick b : bricks.values()) {
             //if (active.get() == null || b.sharesFace(active.get())) {
-                b.draw(canvas, 0xff);
+            b.draw(canvas, 0xff);
             //}
         }
 
@@ -234,8 +264,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         float d = 1;
         for (float i = 0; i < dim.get(); i++) {
             double angle = Math.PI * (i + .5) / (dim.get()) - Math.PI / 2f;
-            Vector v = new Vector((float) Math.sin(angle)*d, (float) Math.cos(angle)*d);
-            d*=(float)size.get();
+            Vector v = new Vector((float) Math.sin(angle) * d, (float) Math.cos(angle) * d);
+            d *= (float) size.get();
             Log.i("adding vector:", v + "");
             dimensionVectors.put((int) i, v);
         }
@@ -246,7 +276,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         float ySum = 1;
         for (Vector v : dimensionVectors.values()) {
             xSum += Math.abs(v.x) * (size.get() - 1);
-            if (v.x <0){
+            if (v.x < 0) {
                 leftSum += Math.abs(v.x) * (size.get() - 1);
             }
             ySum += Math.abs(v.y) * (size.get() - 1);
@@ -261,10 +291,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         }
 
         // find out start point
-        startAt = new Vector((leftSum*scale), (height - ySum * scale) / 2f);
+        startAt = new Vector((leftSum * scale), (height - ySum * scale) / 2f);
 
 
-        outline = new OutLine(this,Math.max(width/2,height/2));
+        outline = new OutLine(this, Math.max(width / 2, height / 2));
     }
 
     public void addBrick(Index i, Brick brick) {
@@ -290,8 +320,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
                 for (int i = path.size() - 1; i > path.indexOf(closeBrick); i--) {
                     path.remove(i);
                 }
-            } else if (path.size() > 1 && legalNext(path.get(path.size()-2), closeBrick)) {
-                path.set(path.size()-1, closeBrick);
+            } else if (path.size() > 1 && legalNext(path.get(path.size() - 2), closeBrick)) {
+                path.set(path.size() - 1, closeBrick);
             } else if (path.size() < 3 && legalNext(closeBrick)) {
                 path.add(closeBrick);
             }
@@ -365,19 +395,19 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     private SpinTo getSpinTo(ArrayList<Brick> path) {
         Index plane = new Index(path.get(0).getIndex());
         for (int j = 0; j < plane.size(); j++) {
-                plane.set(j, 1);
+            plane.set(j, 1);
         }
         // we find what plane all the points have in common
         for (int i = 1; i < path.size(); i++) {
             for (int j = 0; j < plane.size(); j++) {
-                if (!path.get(i-1).getIndex().get(j).equals(path.get(i).getIndex().get(j))) {
+                if (!path.get(i - 1).getIndex().get(j).equals(path.get(i).getIndex().get(j))) {
                     plane.set(j, 0);
                 }
             }
         }
 
         for (int j = 0; j < plane.size(); j++) {
-            plane.set(j, plane.get(j)==0?1:0);
+            plane.set(j, plane.get(j) == 0 ? 1 : 0);
         }
 
         int clicks = 0;
@@ -416,13 +446,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
             for (int at = 0; at < closeBrick.getIndex().size(); at++) {
                 if (closeBrick.getIndex().get(at).equals(pathEnd.getIndex().get(at))) {
                     same++;
-                }else {
+                } else {
                     // if they are not the same it better be and edge
-                    if (cbi.get(at) != 0  && cbi.get(at) != size.get()-1){
+                    if (cbi.get(at) != 0 && cbi.get(at) != size.get() - 1) {
                         return false;
                     }
                     // and the way we are comming from better also be an edge
-                    if (ebi.get(at) != 0  && ebi.get(at) != size.get()-1){
+                    if (ebi.get(at) != 0 && ebi.get(at) != size.get() - 1) {
                         return false;
                     }
                 }

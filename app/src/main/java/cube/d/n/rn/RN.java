@@ -79,4 +79,14 @@ public class RN extends Application {
     public int maxUnlocked() {
         return 0;
     }
+
+    public int unsolvedIndex() {
+        for (Problem p :problems){
+            if (p.getSolved() == false && p.unlocked()){
+                return p.myId;
+            }
+        }
+        // if they have solved them all just leave them on the first one
+        return 0;
+    }
 }

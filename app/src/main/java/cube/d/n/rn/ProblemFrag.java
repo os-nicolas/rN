@@ -60,7 +60,7 @@ public class ProblemFrag extends Fragment{
 
         final MyViewPager mvp = ((MyViewPager)((MainActivity)getActivity()).findViewById(R.id.pager));
 
-
+        rootView.findViewById(R.id.left).setVisibility(problem.myId != 0? View.VISIBLE: View.INVISIBLE);
         ((Button) rootView.findViewById(R.id.left)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,11 +70,12 @@ public class ProblemFrag extends Fragment{
             }
         });
 
+        rootView.findViewById(R.id.right).setVisibility(problem.getSolved() ? View.VISIBLE : View.INVISIBLE);
         ((Button)rootView.findViewById(R.id.right)).setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (mvp.getCurrentItem() < RN.rn().maxUnlocked()) {
+                if (mvp.getCurrentItem() < mvp.getAdapter().getCount()) {
                     mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
                 }
             }
@@ -93,12 +94,11 @@ public class ProblemFrag extends Fragment{
 
         ((TextView)rootView.findViewById(R.id.problem_status)).setText(problem.getSolved() ? "SOLVED" : "");
 
-        final ProblemFrag that = this;
-
         if (!problem.getSolved()){
             problem.onSolved(new Runnable(){
                 @Override
                 public void run() {
+
                     Thread th = new Thread(new Runnable(){
                         @Override
                         public void run() {
@@ -128,6 +128,7 @@ public class ProblemFrag extends Fragment{
                                 @Override
                                 public void run() {
                                     mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
+                                    ((Button)rootView.findViewById(R.id.right)).setVisibility(mvp.getCurrentItem() < mvp.getAdapter().getCount()? View.VISIBLE : View.INVISIBLE);
                                 }
                             });
 
