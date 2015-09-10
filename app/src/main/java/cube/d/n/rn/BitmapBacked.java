@@ -33,7 +33,6 @@ public abstract class BitmapBacked {
         if (dirty){
             // we set dirty to false first so animating objects can set it to true again in updateBitmap
             dirty= false;
-            Log.d("I was dirty","updating");
             myBitmap = updateBitmap();
 
         }

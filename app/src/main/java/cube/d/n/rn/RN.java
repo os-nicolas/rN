@@ -1,6 +1,7 @@
 package cube.d.n.rn;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -13,8 +14,9 @@ import java.util.ArrayList;
  * Created by Colin_000 on 4/22/2015.
  */
 public class RN extends Application {
+    private static final String PREFS_NAME = "GLOBAL";
     private static RN instance;// = new RN();
-    ArrayList<Problem> problems;
+    ArrayList<LayoutInfo> problems;
     public RN(){
         instance=this;
     }
@@ -55,9 +57,9 @@ public class RN extends Application {
         return 3f;
     }
 
-    ArrayList<Problem> initProblems() {
+    ArrayList<LayoutInfo> initProblems() {
 
-        ArrayList<Problem> problemRows = new ArrayList<Problem>();
+        ArrayList<LayoutInfo> problemRows = new ArrayList<LayoutInfo>();
         try {
             InputStream is = getApplicationContext().getAssets().open("Problems.txt");
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -65,7 +67,11 @@ public class RN extends Application {
             //line = reader.readLine(); // the first line is the table header so we skip it
             while ((line = reader.readLine()) != null){
                 String[] data = line.split("\t");
-                problemRows.add(Problem.make(data[0],Integer.parseInt(data[1]),Integer.parseInt(data[2])));
+                if (data[0].equals("p")) {
+                    problemRows.add(Problem.make(data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3])));
+                }else if (data[0].equals("i")){
+                    problemRows.add(ImagePageInfo.make(data[1]));
+                }
             }
             is.close();
         }
@@ -80,13 +86,25 @@ public class RN extends Application {
         return 0;
     }
 
-    public int unsolvedIndex() {
-        for (Problem p :problems){
-            if (p.getSolved() == false && p.unlocked()){
-                return p.myId;
-            }
-        }
-        // if they have solved them all just leave them on the first one
-        return 0;
+//    public int unsolvedIndex() {
+//        for (Problem p :problems){
+//            if (p.getSolved() == false && p.unlocked()){
+//                return p.myId;
+//            }
+//        }
+//        // if they have solved them all just leave them on the first one
+//        return 0;
+//    }
+
+    public int getLast() {
+        SharedPreferences settings = RN.rn().getSharedPreferences(PREFS_NAME, 0);
+        return settings.getInt("last", 0);
+    }
+
+    public void setLast(int last) {
+        SharedPreferences settings = RN.rn().getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("last", last);
+        editor.commit();
     }
 }

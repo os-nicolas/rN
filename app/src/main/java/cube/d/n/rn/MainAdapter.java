@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
@@ -19,22 +18,30 @@ public class MainAdapter extends FragmentPagerAdapter {
         super(fm);
 
 
-
-        Problem last = null;
+        LayoutInfo last = null;
         final MainAdapter that = this;
 
-        for (Problem problem: RN.rn().problems){
+        for (LayoutInfo problem : RN.rn().problems) {
             if (problem.unlocked()) {
-                frags.add(ProblemFrag.make(problem));
-            }else if (last != null){
-                final Problem rProblem = problem;
-                last.onSolved(new Runnable(){
+
+                if (problem instanceof Problem) {
+                    frags.add(ProblemFrag.make((Problem) problem));
+                }else if (problem instanceof ImagePageInfo){
+                    frags.add(ImageFrag.make((ImagePageInfo)problem));
+                }
+            } else if (last != null) {
+                final LayoutInfo rProblem = problem;
+                last.onSolved(new Runnable() {
                     @Override
                     public void run() {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                frags.add(ProblemFrag.make(rProblem));
+                                if (rProblem instanceof Problem) {
+                                    frags.add(ProblemFrag.make((Problem) rProblem));
+                                }else if (rProblem instanceof ImagePageInfo){
+                                    frags.add(ImageFrag.make((ImagePageInfo)rProblem));
+                                }
                                 that.notifyDataSetChanged();
                             }
                         });
@@ -54,6 +61,7 @@ public class MainAdapter extends FragmentPagerAdapter {
 //        frags.add(ProblemFrag.make(3, 4));
 //        frags.add(ProblemFrag.make(4, 3));
     }
+
 
     @Override
     public Fragment getItem(int position) {

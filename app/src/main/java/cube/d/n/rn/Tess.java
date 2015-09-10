@@ -17,6 +17,7 @@ import java.util.HashMap;
  */
 public class Tess extends View implements View.OnTouchListener, HasVectorDims, NoScroll {
 
+    private static final int HIGHLIGHT_WITDTH = 45;
     public HashMap<Index, Brick> bricks = new HashMap<>();
     public GS<Integer> size = new GS<>();
     public GS<Integer> dim = new GS<>();
@@ -114,20 +115,23 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
                 }
             }
         }
-        if (problem != null && !problem.getSolved()) {//
-            if (isCurrentlySolved()) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(AnimatedBrick.runTime);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+        if (problem != null) {
+            problem.updateLastState(getCubeString());
+            if (!problem.getSolved()) {//
+                if (isCurrentlySolved()) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(AnimatedBrick.runTime);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-                        problem.setSolved(true);
-                    }
-                }).start();
+                            problem.setSolved(true);
+                        }
+                    }).start();
+                }
             }
         }
     }
@@ -197,15 +201,68 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
 
         Paint red = new Paint();
         red.setColor(0xFFFFFF00);
-        red.setStrokeWidth(45);
+        red.setStrokeWidth(HIGHLIGHT_WITDTH);
 
         // draw the path we are outlining
-        for (int i = 0; i < path.size() - 1; i++) {
-            Util.drawLine(canvas, path.get(i).getVector(), path.get(i + 1).getVector(), red);
+        if (path.size() != 0) {
+            for (int i = 0; i < path.size() - 1; i++) {
+                Util.drawLine(canvas, path.get(i).getVector(), path.get(i + 1).getVector(), red);
+            }
+
+            if (path.size() != 0 && current != null && path.size() < 3) {
+                Util.drawLine(canvas, path.get(path.size() - 1).getVector(), current, red);
+            }
+
+            // now we draw the arrow
+
+
+            float xTo = 0, yTo = 0, xFrom = 0, yFrom = 0;
+
+            if (path.size() == 3) {
+                xTo = path.get(path.size() - 1).getVector().x;
+                yTo = path.get(path.size() - 1).getVector().y;
+                xFrom = path.get(path.size() - 2).getVector().x;
+                yFrom = path.get(path.size() - 2).getVector().y;
+            } else {
+                xTo = current.x;
+                yTo = current.y;
+                xFrom = path.get(path.size() - 1).getVector().x;
+                yFrom = path.get(path.size() - 1).getVector().y;
+            }
+
+
+            float dx = xTo - xFrom;
+            float dy = yTo - yFrom;
+            float d = (float) Math.sqrt(dx * dx + dy * dy);
+
+            float arrowSize = 60;
+            Paint yellow = new Paint();
+            yellow.setColor(red.getColor());
+            Vector point = new Vector(
+                    xTo + (dx / d) * arrowSize,
+                    yTo + (dy / d) * arrowSize);
+            //Util.drawCircle(canvas, point, HIGHLIGHT_WITDTH, yellow);
+
+            Vector left = new Vector(
+                    xTo + (dy / d) * arrowSize,
+                    yTo - (dx / d) * arrowSize);
+            //Util.drawCircle(canvas, left, HIGHLIGHT_WITDTH, yellow);
+
+            Vector right = new Vector(
+                    xTo - (dy / d) * arrowSize,
+                    yTo + (dx / d) * arrowSize);
+            //Util.drawCircle(canvas, right, HIGHLIGHT_WITDTH, yellow);
+
+
+            Util.drawShape(canvas, new Vector[]{point, right, left}, yellow);
+
+        } else if (current != null) {
+            Paint yellow = new Paint();
+            yellow.setColor(red.getColor());
+            Util.drawCircle(canvas, current, HIGHLIGHT_WITDTH, yellow);
+
         }
-        if (path.size() != 0 && current != null && path.size() < 3) {
-            Util.drawLine(canvas, path.get(path.size() - 1).getVector(), current, red);
-        }
+
 
         outline.drawBitmap(canvas, 0, 0, new Paint());
 
@@ -262,10 +319,13 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
 
     private void intiDimVectors(float width, float height) {
         float d = 1;
-        for (float i = 0; i < dim.get(); i++) {
-            double angle = Math.PI * (i + .5) / (dim.get()) - Math.PI / 2f;
+        float[] ds= new float[]{1,3,2,4};
+        for (int i = 0; i < dim.get(); i++) {
+            double angle = Math.PI * (i + .5f) / (dim.get()) - Math.PI / 2f;
+            d  =ds[i];
             Vector v = new Vector((float) Math.sin(angle) * d, (float) Math.cos(angle) * d);
-            d *= (float) size.get();
+
+            //d *= 2;//Math.sqrt(size.get());//1.2;//(float) size.get();
             Log.i("adding vector:", v + "");
             dimensionVectors.put((int) i, v);
         }

@@ -143,4 +143,17 @@ public class Util {
         }
         return false;
     }
+
+    public static void drawShape(Canvas canvas, Vector[] vectors, Paint p) {
+        Path path = new Path();
+
+
+        path.moveTo(vectors[0].x,vectors[0].y);
+
+        for (Vector v: vectors){
+            path.lineTo(v.x,v.y);
+        }
+        path.lineTo(vectors[0].x,vectors[0].y);
+        canvas.drawPath(path, p);
+    }
 }

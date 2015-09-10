@@ -18,11 +18,33 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Tess myView = new Tess(this,3,3);
+        //Tess myView = new Tess(this,3,3);
 
         setContentView(R.layout.activity_main);//R.layout.activity_main
 
        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+
+        Log.d("margin",mViewPager.getPageMargin()+"");
+        mViewPager.setPageMargin(0);
+
+
+        //this looks like it will soon be depricated and replaced with Add
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener(){
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                RN.rn().setLast(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+        }
+        });
+
 
         if (mViewPager.getAdapter() == null) {
             MainAdapter adapter =
@@ -31,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
             mViewPager.setAdapter(adapter);
 
         }
-        mViewPager.setCurrentItem(RN.rn().unsolvedIndex(), true);
+        mViewPager.setCurrentItem(RN.rn().getLast(), true);
 
 
     }

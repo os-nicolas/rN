@@ -34,10 +34,10 @@ public class ProblemFrag extends Fragment{
         return result;
     }
 
-    public Problem getProblem(){
+    public LayoutInfo getProblem(){
         Bundle args = getArguments();
         int id = args.getInt("ID");
-        return Problem.getProblem(id);
+        return LayoutInfo.getPage(id);
     }
 
     @Override
@@ -52,10 +52,10 @@ public class ProblemFrag extends Fragment{
         final View rootView = inflater.inflate(
                 R.layout.cube_frame, container, false);
         final Tess t = (Tess)rootView.findViewById(R.id.cube);
-        final Problem problem = getProblem();
+        final Problem problem = (Problem)getProblem();
         t.setProblem(problem);
 
-        t.init(problem.dim, problem.size,problem.startState);
+        t.init(problem.dim, problem.size,problem.getState());
         final String resetTo = t.getCubeString();
 
         final MyViewPager mvp = ((MyViewPager)((MainActivity)getActivity()).findViewById(R.id.pager));
@@ -143,6 +143,4 @@ public class ProblemFrag extends Fragment{
 
         return rootView;
     }
-
-
 }
