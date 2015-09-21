@@ -11,26 +11,29 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * Created by Colin on 8/24/2015.
- * TODO superclass?
+ * Created by Colin on 9/14/2015.
  */
-public class ImageFrag extends Fragment {
-    public static Fragment make(ImagePageInfo imagePageInfo) {
-        ImageFrag result = new ImageFrag();
+public class TextFrag  extends Fragment {
+    private boolean textGone = false;
+    TextView tv;
+
+    public static Fragment make(TextPageInfo imagePageInfo) {
+        TextFrag result = new TextFrag();
         Bundle args = new Bundle();
         args.putInt("ID",imagePageInfo.myId);
         result.setArguments(args);
         return result;
     }
 
-    public LayoutInfo getProblem(){
+    public TextPageInfo getProblem(){
         Bundle args = getArguments();
         int id = args.getInt("ID");
-        return LayoutInfo.getPage(id);
+        return (TextPageInfo)LayoutInfo.getPage(id);
     }
 
     public void onResume(){
         super.onResume();
+        Log.i("resuming","textFrag "+ getProblem().text);
         if (!getProblem().getSolved()) {
             getProblem().setSolved(true);
         }
@@ -46,10 +49,14 @@ public class ImageFrag extends Fragment {
         // properly.
 
         final View rootView = inflater.inflate(
-                R.layout.image_frame, container, false);
-        ImageView iv = (ImageView)rootView.findViewById(R.id.image);
-//      iv.setImageResource(R.drawable.c_and_h);
-        final ImagePageInfo imagePageInfo = (ImagePageInfo)getProblem();
+                R.layout.text_frame, container, false);
+        tv = (TextView)rootView.findViewById(R.id.text);
+        tv.setText(((TextPageInfo)getProblem()).text);
+        tv.setAlpha(0);
+        tv.setScaleX(1.5f);
+        tv.setScaleY(1.5f);
+        textGone = true;
+        final TextPageInfo imagePageInfo = (TextPageInfo)getProblem();
         //t.setProblem(problem);
 
         //t.init(problem.dim, problem.size,problem.getState());
@@ -93,5 +100,16 @@ public class ImageFrag extends Fragment {
             });
         }
         return rootView;
+    }
+
+    public void start() {
+        if (textGone) {
+            tv.animate().withLayer().alpha(1).scaleX(1).scaleX(1).scaleY(1).setStartDelay(0).setDuration(400).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    textGone = false;
+                }
+            }).start();
+        }
     }
 }

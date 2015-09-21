@@ -19,6 +19,7 @@ public class Brick extends BitmapBacked {
     final public Tess owner;
     final int dbColor;
     final Index startIndex;
+    Paint p;
 
     // bricks have a color for every pair of dimensions
     HashMap<Index, Face> faces = new HashMap<>();
@@ -30,6 +31,7 @@ public class Brick extends BitmapBacked {
         this.startIndex = new Index(startIndex);
         initFaces(new Index(owner.size.get()));
 
+        p = new Paint();
         Random r = new Random();
         dbColor = r.nextInt(0xffffff) + 0x88000000;
     }
@@ -104,7 +106,6 @@ public class Brick extends BitmapBacked {
     public void draw(Canvas canvas, int alpha) {
         if (!hasAnimation()) {
             Vector startAt = getIndex().getVector(owner);
-            Paint p = new Paint();
             p.setAlpha(alpha);
             drawBitmap(canvas, startAt.x - myRadius(), startAt.y - myRadius(), p);
         }
@@ -171,7 +172,7 @@ public class Brick extends BitmapBacked {
     }
 
     public boolean in(Vector vector) {
-        return distance(vector) < 2*myRadius();
+        return distance(vector) < 1.6*myRadius();
     }
 
     public float distance(Vector vector) {

@@ -43,6 +43,7 @@ public class OutLine extends BitmapBacked {
                     indexTo.set(at, indexTo.get(at)+1);
 
                     Vector start = index.getVector(tess);
+
                     Vector end = indexTo.getVector(tess);
 
                     Util.drawShadedLine(

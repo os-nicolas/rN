@@ -27,6 +27,8 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     private OutLine outline;
     public float radius = 50;
     private Problem problem;
+    private Paint outlinePaint;
+    private Paint red;
 
     public Tess(Context context, int dim, int size) {
         super(context);
@@ -36,12 +38,10 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     }
 
     public void init(final int dim, final int size) {
-        final Tess that = this;
-
 
         pInit(dim, size);
 
-        initCube(new Index(that.size.get()));
+        initCube(new Index(this.size.get()));
 
     }
 
@@ -64,6 +64,11 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         animations = new ArrayList<>();
         this.dim.set(dim);
         this.size.set(size);
+
+        outlinePaint = new Paint();
+        red = new Paint();
+        red.setColor(0xFFFFFF00);
+        red.setStrokeWidth(HIGHLIGHT_WITDTH);
 
         final Tess that = this;
         this.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -181,6 +186,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
             }
             at++;
         }
+        problem.updateLastState(getCubeString());
     }
 
     public boolean isCurrentlySolved() {
@@ -199,12 +205,16 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
     public synchronized void onDraw(Canvas canvas) {
         // draw outline
 
-        Paint red = new Paint();
-        red.setColor(0xFFFFFF00);
-        red.setStrokeWidth(HIGHLIGHT_WITDTH);
+
 
         // draw the path we are outlining
         if (path.size() != 0) {
+            if(path.size()==3){
+                red.setAlpha(0xff);
+            }else {
+                red.setAlpha(0x88);
+            }
+
             for (int i = 0; i < path.size() - 1; i++) {
                 Util.drawLine(canvas, path.get(i).getVector(), path.get(i + 1).getVector(), red);
             }
@@ -264,7 +274,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         }
 
 
-        outline.drawBitmap(canvas, 0, 0, new Paint());
+        outline.drawBitmap(canvas, 0, 0, outlinePaint);
 
         // draw animations
         for (int i = animations.size() - 1; i >= 0; i--) {
@@ -332,6 +342,7 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
 
         // scale the vectors to fit in the screen
         float xSum = 1;
+        float topSum = .5f;
         float leftSum = .5f;
         float ySum = 1;
         for (Vector v : dimensionVectors.values()) {
@@ -351,7 +362,9 @@ public class Tess extends View implements View.OnTouchListener, HasVectorDims, N
         }
 
         // find out start point
-        startAt = new Vector((leftSum * scale), (height - ySum * scale) / 2f);
+        startAt = new Vector(
+                (leftSum * scale) + ((width - (xSum *scale))/2f)
+                , (topSum * scale) + (height - (ySum * scale)) / 2f);
 
 
         outline = new OutLine(this, Math.max(width / 2, height / 2));

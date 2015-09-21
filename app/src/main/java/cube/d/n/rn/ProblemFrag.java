@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by Colin on 8/19/2015.
  */
@@ -55,12 +57,14 @@ public class ProblemFrag extends Fragment{
         final Problem problem = (Problem)getProblem();
         t.setProblem(problem);
 
+        Log.d("loading problem","saved state: " + problem.getState());
+
         t.init(problem.dim, problem.size,problem.getState());
-        final String resetTo = t.getCubeString();
+        final String resetTo = problem.getStartState();
 
         final MyViewPager mvp = ((MyViewPager)((MainActivity)getActivity()).findViewById(R.id.pager));
 
-        rootView.findViewById(R.id.left).setVisibility(problem.myId != 0? View.VISIBLE: View.INVISIBLE);
+        rootView.findViewById(R.id.left).setVisibility(problem.myId != 0 ? View.VISIBLE : View.INVISIBLE);
         ((Button) rootView.findViewById(R.id.left)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,65 +85,115 @@ public class ProblemFrag extends Fragment{
             }
         });
 
+        final WeakReference<Tess> tessWeakReference = new WeakReference<Tess>(t);
         rootView.findViewById(R.id.reset).setOnClickListener(new View.OnClickListener() {
 
+            boolean canAct=true;
             @Override
             public void onClick(View v) {
-                Log.i("resetting from", t.getCubeString());
-                t.resetTo(resetTo);
+                if (canAct) {
+                    canAct = false;
+                    Tess myt = tessWeakReference.get();
+                    if (myt != null) {
+                        Log.i("resetting from", t.getCubeString());
+                        Log.i("resetting to", resetTo);
+                        t.animate().withLayer().alpha(0).scaleX(1.2f).scaleY(1.2f).setDuration(400).withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                t.resetTo(resetTo);
+                                t.animate().withLayer().setStartDelay(200).setDuration(400).alpha(1).scaleX(1f).scaleY(1f).withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        canAct = true;
+                                    }
+                                }).start();
+                            }
+                        }).start();
+                    }
+                }
             }
         });
 
         ((TextView)rootView.findViewById(R.id.problem_number)).setText("" + (problem.myId));
 
-        ((TextView)rootView.findViewById(R.id.problem_status)).setText(problem.getSolved() ? "SOLVED" : "");
+        if (problem.getSolved()) {
+            if (problem.solved){
+                ((TextView) rootView.findViewById(R.id.problem_status)).setText("");
 
-        if (!problem.getSolved()){
-            problem.onSolved(new Runnable(){
+            }else{
+            ((TextView) rootView.findViewById(R.id.problem_status)).setText("Solved");
+            }
+        }else{
+            problem.onSolved(new Runnable() {
                 @Override
                 public void run() {
-
-                    Thread th = new Thread(new Runnable(){
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            String solved ="SOLVED";
-                            String current = "";
-                            for (int i=0;i<solved.length();i++){
-                                try {
-                                    Thread.sleep(100);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                current+=solved.charAt(i);
-                                final String c = current;
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        ((TextView) rootView.findViewById(R.id.problem_status)).setText(c);
-                                    }
-                                });
-                            }
-                            try {
-                                Thread.sleep(400);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            getActivity().runOnUiThread(new Runnable() {
+                            ((TextView) rootView.findViewById(R.id.problem_status)).animate().withLayer().alpha(0).scaleX(1.5f).scaleY(1.5f).setDuration(100).withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
-                                    ((Button)rootView.findViewById(R.id.right)).setVisibility(mvp.getCurrentItem() < mvp.getAdapter().getCount()? View.VISIBLE : View.INVISIBLE);
+                                    ((TextView) rootView.findViewById(R.id.problem_status)).setText("Solved");
+                                    ((TextView) rootView.findViewById(R.id.problem_status)).animate().withLayer().alpha(1).scaleX(1).scaleY(1).setDuration(600).withEndAction(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ((Button) rootView.findViewById(R.id.right)).setVisibility(mvp.getCurrentItem() < mvp.getAdapter().getCount() ? View.VISIBLE : View.INVISIBLE);
+                                            mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
+                                        }
+                                    }).start();
                                 }
-                            });
-
+                            }).start();
                         }
                     });
-                    th.start();
-
-
                 }
             });
+            ((TextView) rootView.findViewById(R.id.problem_status)).setText("");
         }
+        //if (!problem.getSolved()){
+
+//
+//
+//                    Thread th = new Thread(new Runnable(){
+//                        @Override
+//                        public void run() {
+//                            String solved ="SOLVED";
+//                            String current = "";
+//                            for (int i=0;i<solved.length();i++){
+//                                try {
+//                                    Thread.sleep(100);
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                current+=solved.charAt(i);
+//                                final String c = current;
+//                                getActivity().runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        ((TextView) rootView.findViewById(R.id.problem_status)).setText(c);
+//                                    }
+//                                });
+//                            }
+//                            try {
+//                                Thread.sleep(400);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mvp.setCurrentItem(mvp.getCurrentItem() + 1, true);
+//                                    ((Button)rootView.findViewById(R.id.right)).setVisibility(mvp.getCurrentItem() < mvp.getAdapter().getCount()? View.VISIBLE : View.INVISIBLE);
+//                                }
+//                            });
+//
+//                        }
+//                    });
+//                    th.start();
+
+
+//                }
+//            });
+//        }
 
         return rootView;
     }

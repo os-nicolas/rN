@@ -30,7 +30,6 @@ public abstract class LayoutInfo {
             for(Runnable r: runOnSolved){
                 r.run();
             }
-
         }
         SharedPreferences settings = RN.rn().getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
@@ -43,7 +42,7 @@ public abstract class LayoutInfo {
             return true;
         }else{
             LayoutInfo before = getPage(myId-1);
-            return before.getSolved();
+            return before.getSolved() || getSolved();
         }
     }
 

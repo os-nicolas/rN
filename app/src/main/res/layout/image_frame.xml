@@ -11,7 +11,8 @@
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:scaleType="fitXY"
+        android:scaleType="centerInside"
+        android:src="@drawable/gold_star"
         android:layout_weight="1"
         android:id="@+id/image"/>
 

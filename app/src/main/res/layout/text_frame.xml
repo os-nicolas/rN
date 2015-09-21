@@ -3,16 +3,31 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <cube.d.n.rn.BotBar
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
-
-    <cube.d.n.rn.Tess
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="5dp"
-        android:id="@+id/cube"/>
+        android:layout_gravity="center"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:text="This!"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:textColor="#333333"
+            android:textSize="30dp"
+            android:id="@+id/text"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+
 
     <FrameLayout
         android:background="#ffffff"
@@ -22,11 +37,10 @@
 
         <TextView
             android:layout_width="wrap_content"
+            android:padding="15dp"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="UNSOLVED"
-
-            android:padding="15dp"
             android:id="@+id/problem_status" />
 
         <TextView
@@ -34,7 +48,6 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="18"
-
             android:padding="15dp"
             android:id="@+id/problem_number"
             android:gravity="right" />

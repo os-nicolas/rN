@@ -40,22 +40,22 @@ public class RN extends Application {
     public int fadeTime() {
         return 500;
     }
-
-    public float rate() {
-        return 5;
-    }
-
-    public float scale() {
-        return 1;
-    }
-
-    public int getDarkColor() {
-        return 0xff888888;
-    }
-
-    public float getStrokeWidth() {
-        return 3f;
-    }
+//
+//    public float rate() {
+//        return 5;
+//    }
+//
+//    public float scale() {
+//        return 1;
+//    }
+//
+//    public int getDarkColor() {
+//        return 0xff888888;
+//    }
+//
+//    public float getStrokeWidth() {
+//        return 3f;
+//    }
 
     ArrayList<LayoutInfo> initProblems() {
 
@@ -68,9 +68,11 @@ public class RN extends Application {
             while ((line = reader.readLine()) != null){
                 String[] data = line.split("\t");
                 if (data[0].equals("p")) {
-                    problemRows.add(Problem.make(data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3])));
+                    problemRows.add(Problem.make(data[1], Integer.parseInt(data[2]), Integer.parseInt(data[3]),data[4].equals("true")));
                 }else if (data[0].equals("i")){
                     problemRows.add(ImagePageInfo.make(data[1]));
+                }else if (data[0].equals("t")){
+                    problemRows.add(TextPageInfo.make(data[1]));
                 }
             }
             is.close();
@@ -82,9 +84,9 @@ public class RN extends Application {
         return problemRows;
     }
 
-    public int maxUnlocked() {
-        return 0;
-    }
+//    public int maxUnlocked() {
+//        return 0;
+//    }
 
 //    public int unsolvedIndex() {
 //        for (Problem p :problems){
