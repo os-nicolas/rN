@@ -43,6 +43,13 @@ public class Index extends ArrayList<Integer> {
         return pos;
     }
 
+    public Index(int[] ins){
+        super();
+        for (Integer i:ins){
+            add(new Integer(i));
+        }
+    }
+
     public Vector getVector(HasVectorDims tess) {
             Vector at = new Vector(tess.getStartAt());
 
@@ -113,4 +120,6 @@ public class Index extends ArrayList<Integer> {
         }
         return newIndex;
     }
+
+
 }
